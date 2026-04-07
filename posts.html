@@ -86,6 +86,15 @@
     .filter-list { display: flex; flex-wrap: wrap; gap: 10px; }
     .search-box {
       margin-left: auto;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .search-box.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
     .search-box input {
       width: 220px;
@@ -178,7 +187,7 @@
         <button class="filter-chip" data-filter="논문/컨퍼런스" type="button">논문/컨퍼런스</button>
         <button class="filter-chip" data-filter="공모전/자격증" type="button">공모전/자격증</button>
       </div>
-      <div class="search-box">
+      <div class="search-box" id="searchBox">
         <input type="text" id="searchInput" placeholder="검색 (제목/내용)" />
       </div>
     </section>
@@ -259,53 +268,57 @@
       });
     });
 
-    // 카드 전체 클릭
-    document.querySelectorAll('.post-card').forEach((card) => {
-      card.addEventListener('click', () => {
+    const searchBox = document.getElementById('searchBox');
+    const searchButton = document.querySelector('.search-btn');
+    const searchInput = document.getElementById('searchInput');
+    const filterChips = document.querySelectorAll('.filter-chip');
+    const postCards = document.querySelectorAll('.post-card');
+
+    function applyFilters() {
+      const activeChip = document.querySelector('.filter-chip.active');
+      const activeCategory = activeChip ? activeChip.dataset.filter : 'all';
+      const keyword = (searchInput?.value || '').toLowerCase().trim();
+
+      postCards.forEach((card) => {
+        const category = card.dataset.category || '';
+        const text = card.innerText.toLowerCase();
+        const matchCategory = activeCategory === 'all' || category === activeCategory;
+        const matchSearch = keyword === '' || text.includes(keyword);
+        card.style.display = matchCategory && matchSearch ? '' : 'none';
+      });
+    }
+
+    postCards.forEach((card) => {
+      card.addEventListener('click', (event) => {
+        if (event.target.closest('a')) return;
         const link = card.dataset.link;
         if (link) window.location.href = link;
       });
     });
 
-    const searchInput = document.getElementById('searchInput');
-    const filterChips = document.querySelectorAll('.filter-chip');
-    const postCards = document.querySelectorAll('.post-card');
+    if (searchButton && searchBox && searchInput) {
+      searchButton.addEventListener('click', () => {
+        searchBox.classList.toggle('active');
+        if (searchBox.classList.contains('active')) {
+          searchInput.focus();
+        } else {
+          searchInput.value = '';
+          applyFilters();
+        }
+      });
+    }
 
     filterChips.forEach((chip) => {
       chip.addEventListener('click', () => {
-        const selected = chip.dataset.filter;
-
         filterChips.forEach((item) => item.classList.remove('active'));
         chip.classList.add('active');
-
-        postCards.forEach((card) => {
-          const category = card.dataset.category;
-          const text = card.innerText.toLowerCase();
-          const keyword = searchInput.value.toLowerCase();
-
-          const matchCategory = selected === 'all' || category === selected;
-          const matchSearch = text.includes(keyword);
-
-          const shouldShow = matchCategory && matchSearch;
-          card.style.display = shouldShow ? '' : 'none';
-        });
-      });
-
-    searchInput.addEventListener('input', () => {
-      const active = document.querySelector('.filter-chip.active').dataset.filter;
-      postCards.forEach((card) => {
-        const category = card.dataset.category;
-        const text = card.innerText.toLowerCase();
-        const keyword = searchInput.value.toLowerCase();
-
-        const matchCategory = active === 'all' || category === active;
-        const matchSearch = text.includes(keyword);
-
-        const shouldShow = matchCategory && matchSearch;
-        card.style.display = shouldShow ? '' : 'none';
+        applyFilters();
       });
     });
-    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
+    }
   </script>
 </body>
 </html>
