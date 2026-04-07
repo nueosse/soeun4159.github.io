@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Posts | 소은 Security Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom, #0b1220, #0f2f2a);
+      color: #ffffff;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(1120px, calc(100% - 64px)); margin: 0 auto; }
+    .site-header {
+      position: sticky; top: 0; z-index: 1000; background: #000;
+      border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(18px);
+    }
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px; padding: 16px 0;
+    }
+    .brand, .site-nav { font-family: "JetBrains Mono", monospace; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+    .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .site-nav { display: flex; align-items: center; gap: 20px; font-size: 14px; color: rgba(255,255,255,0.82); }
+    .search-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      color: rgba(255,255,255,0.92);
+      cursor: pointer;
+    }
+    .search-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+    .site-nav a, .footer-links a, .filter-chip { transition: color .2s ease, border-color .2s ease, background .2s ease; }
+    .site-nav a:hover, .site-nav a.active, .footer-links a:hover { color: #2ee6c2; }
+    .main { padding: 40px 0 16px; display: flex; flex-direction: column; gap: 28px; }
+    .section-label {
+      margin: 0; font-size: 13px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .24em; color: #2ee6c2;
+    }
+    .section-title { margin: 8px 0 0; font-size: 30px; font-weight: 600; color: #fff; }
+    .glow-card {
+      position: relative; overflow: hidden; border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.1); background: #fff;
+      transition: transform .25s ease, box-shadow .25s ease; --x: 50%; --y: 50%;
+    }
+    .glow-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.14); }
+    .glow-card::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(180px circle at var(--x) var(--y), rgba(46,230,194,.2), transparent 60%);
+      opacity: 0; transition: opacity .16s ease; pointer-events: none;
+    }
+    .glow-card:hover::before { opacity: 1; }
+    .card-content { position: relative; z-index: 1; }
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    .filter-list { display: flex; flex-wrap: wrap; gap: 10px; }
+    .search-box {
+      margin-left: auto;
+    }
+    .search-box input {
+      width: 220px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      outline: none;
+      font-size: 14px;
+    }
+    .search-box input::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+    .filter-chip {
+      display: inline-flex; align-items: center; padding: 8px 12px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16); color: rgba(255,255,255,0.82); font-size: 14px;
+      background: transparent; cursor: pointer;
+    }
+    .filter-chip.active, .filter-chip:hover { background: rgba(46,230,194,.12); border-color: #2ee6c2; color: #2ee6c2; }
+    .post-list { display: grid; gap: 18px; padding-bottom: 24px; }
+    .post-card { padding: 18px; cursor: pointer; }
+    .post-layout { display: flex; align-items: center; gap: 18px; }
+    .post-body { flex: 1; min-width: 0; }
+    .post-thumb {
+      width: 120px; height: 88px; border-radius: 16px; overflow: hidden; flex-shrink: 0; order: 2;
+      background: rgba(255,255,255,.06);
+    }
+    .post-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .post-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .badge {
+      display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 500;
+    }
+    .badge.dev { background: rgba(46,230,194,.14); color: #2ee6c2; }
+    .badge.forensics { background: rgba(124,158,255,.16); color: #7c9eff; }
+    .badge.ctf { background: rgba(255,107,107,.14); color: #ff6b6b; }
+    .post-date { font-size: 13px; color: rgba(0,0,0,.48); }
+    .post-title { margin: 0; font-size: 22px; line-height: 1.45; font-weight: 600; color: #111; }
+    .post-excerpt { margin: 8px 0 0; font-size: 15px; line-height: 1.8; color: rgba(0,0,0,.68); }
+    .site-footer { border-top: 1px solid rgba(255,255,255,0.1); }
+    .footer-inner {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 16px 0; font-size: 14px; color: rgba(255,255,255,.62);
+    }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+    @media (max-width: 768px) {
+      .container { width: min(100% - 32px, 1120px); }
+      .header-inner { flex-wrap: wrap; }
+      .site-nav { width: 100%; justify-content: flex-end; }
+      .post-layout { align-items: center; }
+      .post-thumb { width: 90px; height: 70px; }
+      .footer-inner { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="brand">
+        <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80" alt="profile" />
+        soeun4159 | Security Blog
+      </a>
+      <nav class="site-nav">
+        <a href="/index.html">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/posts.html" class="active">Post</a>
+        <button class="search-btn" aria-label="search">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2.2"/>
+            <path d="M16 16L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main container">
+    <section>
+      <p class="section-label">Posts</p>
+      <h1 class="section-title">전체 글 모아보기</h1>
+    </section>
+
+    <section class="toolbar">
+      <div class="filter-list">
+        <button class="filter-chip active" data-filter="all" type="button">All</button>
+        <button class="filter-chip" data-filter="개발" type="button">개발</button>
+        <button class="filter-chip" data-filter="CTF/Wargame" type="button">CTF/Wargame</button>
+        <button class="filter-chip" data-filter="BugBounty" type="button">BugBounty</button>
+        <button class="filter-chip" data-filter="블로그/기술문서" type="button">블로그/기술문서</button>
+        <button class="filter-chip" data-filter="논문/컨퍼런스" type="button">논문/컨퍼런스</button>
+        <button class="filter-chip" data-filter="공모전/자격증" type="button">공모전/자격증</button>
+      </div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="검색 (제목/내용)" />
+      </div>
+    </section>
+
+    <section class="post-list">
+      <article class="glow-card post-card" data-category="개발" data-link="/posts/post1.html">
+        <div class="card-content post-layout">
+          <div class="post-thumb">
+            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80" alt="웹 취약점 분석 기록 템플릿" />
+          </div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span class="badge dev">개발</span>
+              <span class="post-date">2026.04.07</span>
+            </div>
+            <h2 class="post-title"><a href="/posts/post1.html">웹 취약점 분석 기록 템플릿</a></h2>
+            <p class="post-excerpt">문제 풀이부터 재현, 원인 분석, 방어 포인트까지 한 번에 정리할 수 있는 개인용 기록 포맷을 만들었습니다. 실제 블로그 글을 쓸 때 바로 활용할 수 있는 구조를 중심으로 정리했습니다.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="glow-card post-card" data-category="블로그/기술문서" data-link="/posts/post2.html">
+        <div class="card-content post-layout">
+          <div class="post-thumb">
+            <img src="https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=900&q=80" alt="디지털 포렌식 입문 메모" />
+          </div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span class="badge forensics">포렌식</span>
+              <span class="post-date">2026.04.05</span>
+            </div>
+            <h2 class="post-title"><a href="/posts/post2.html">디지털 포렌식 입문 메모</a></h2>
+            <p class="post-excerpt">아티팩트, 로그, 타임라인 관점에서 초반에 꼭 잡아야 할 포인트들을 정리했습니다. 포렌식을 처음 공부할 때 어떤 순서로 접근하면 좋은지도 함께 담았습니다.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="glow-card post-card" data-category="CTF/Wargame" data-link="/posts/post3.html">
+        <div class="card-content post-layout">
+          <div class="post-thumb">
+            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80" alt="CTF 풀이를 블로그 글로 바꾸는 법" />
+          </div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span class="badge ctf">CTF/Wargame</span>
+              <span class="post-date">2026.04.01</span>
+            </div>
+            <h2 class="post-title"><a href="/posts/post3.html">CTF 풀이를 블로그 글로 바꾸는 법</a></h2>
+            <p class="post-excerpt">풀이를 단순 정답 모음으로 끝내지 않고, 다른 사람도 읽기 좋은 글로 바꾸는 과정을 정리했습니다. 문제 접근, 실패 과정, 핵심 포인트를 구조화하는 방법을 담았습니다.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/">github</a>
+        <a href="mailto:your@email.com">email</a>
+        <a href="https://discord.com/">discord</a>
+        <a href="https://instagram.com/">instagram</a>
+      </div>
+      <p>© 2026 Soeun Security Blog. Built with GitHub Pages.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.glow-card').forEach((card) => {
+      card.addEventListener('mousemove', (event) => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--x', `${event.clientX - rect.left}px`);
+        card.style.setProperty('--y', `${event.clientY - rect.top}px`);
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--x', '50%');
+        card.style.setProperty('--y', '50%');
+      });
+    });
+
+    // 카드 전체 클릭
+    document.querySelectorAll('.post-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        const link = card.dataset.link;
+        if (link) window.location.href = link;
+      });
+    });
+
+    const searchInput = document.getElementById('searchInput');
+    const filterChips = document.querySelectorAll('.filter-chip');
+    const postCards = document.querySelectorAll('.post-card');
+
+    filterChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const selected = chip.dataset.filter;
+
+        filterChips.forEach((item) => item.classList.remove('active'));
+        chip.classList.add('active');
+
+        postCards.forEach((card) => {
+          const category = card.dataset.category;
+          const text = card.innerText.toLowerCase();
+          const keyword = searchInput.value.toLowerCase();
+
+          const matchCategory = selected === 'all' || category === selected;
+          const matchSearch = text.includes(keyword);
+
+          const shouldShow = matchCategory && matchSearch;
+          card.style.display = shouldShow ? '' : 'none';
+        });
+      });
+
+    searchInput.addEventListener('input', () => {
+      const active = document.querySelector('.filter-chip.active').dataset.filter;
+      postCards.forEach((card) => {
+        const category = card.dataset.category;
+        const text = card.innerText.toLowerCase();
+        const keyword = searchInput.value.toLowerCase();
+
+        const matchCategory = active === 'all' || category === active;
+        const matchSearch = text.includes(keyword);
+
+        const shouldShow = matchCategory && matchSearch;
+        card.style.display = shouldShow ? '' : 'none';
+      });
+    });
+    });
+  </script>
+</body>
+</html>
