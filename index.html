@@ -19,7 +19,7 @@
     a { color: inherit; text-decoration: none; }
     button { font: inherit; }
     .container {
-      width: min(1120px, calc(100% - 48px));
+      width: min(1120px, calc(100% - 64px));
       margin: 0 auto;
     }
     .site-header {
@@ -39,22 +39,33 @@
     }
     .brand, .site-nav { font-family: "JetBrains Mono", monospace; }
     .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-size: 18px;
       font-weight: 600;
-      color: #ffffff;
+      color: #fff;
       letter-spacing: 0.02em;
+    }
+    .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
     }
     .site-nav {
       display: flex;
       align-items: center;
       gap: 20px;
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.82);
+      color: rgba(255,255,255,0.82);
     }
-    .site-nav a, .search-btn, .footer-links a {
-      transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    .site-nav a, .footer-links a {
+      transition: color .2s ease, border-color .2s ease, transform .2s ease;
     }
-    .site-nav a:hover, .search-btn:hover, .footer-links a:hover { color: #2ee6c2; }
+    .site-nav a:hover, .footer-links a:hover, .site-nav a.active {
+      color: #2ee6c2;
+    }
     .search-btn {
       display: inline-flex;
       align-items: center;
@@ -62,18 +73,14 @@
       width: 46px;
       height: 46px;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255,255,255,0.12);
       background: transparent;
-      color: rgba(255, 255, 255, 0.92);
+      color: rgba(255,255,255,0.92);
       cursor: pointer;
       padding: 0;
       flex-shrink: 0;
     }
-    .search-btn svg {
-      width: 22px;
-      height: 22px;
-      display: block;
-    }
+    .search-btn svg { width: 22px; height: 22px; display: block; }
     .main {
       padding: 24px 0 32px;
       display: flex;
@@ -120,19 +127,22 @@
     }
     .glow-card:hover::before { opacity: 1; }
     .card-content { position: relative; z-index: 1; }
-    .intro-card { padding: 16px 24px; }
+    .intro-card {
+      padding: 16px 24px;
+      cursor: pointer;
+    }
     .intro-grid {
       display: grid;
       grid-template-columns: 160px minmax(0, 1fr);
       align-items: center;
-      gap: 16px;
+      gap: 28px;
     }
     .profile-image {
       width: 160px;
       height: 160px;
       border-radius: 50%;
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255,255,255,0.06);
       flex-shrink: 0;
     }
     .profile-image img {
@@ -160,6 +170,7 @@
       gap: 20px;
     }
     .category-card {
+      cursor: pointer;
       padding: 16px;
       min-height: 90px;
       border-width: 2px;
@@ -175,8 +186,10 @@
     .category-card h3 {
       margin: 0;
       font-size: 22px;
-      font-weight: 600;
+      font-weight: 700;
       color: #111111;
+      font-family: "Pretendard", sans-serif;
+      letter-spacing: 0.08em;
     }
     .category-desc {
       margin: 4px 0 0;
@@ -194,7 +207,10 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 20px;
     }
-    .recent-card { padding: 16px; }
+    .recent-card {
+      padding: 16px;
+      cursor: pointer;
+    }
     .recent-layout {
       display: flex;
       flex-direction: row;
@@ -228,18 +244,9 @@
       font-size: 12px;
       font-weight: 500;
     }
-    .post-badge.dev {
-      background: rgba(46, 230, 194, 0.14);
-      color: #2ee6c2;
-    }
-    .post-badge.forensics {
-      background: rgba(124, 158, 255, 0.16);
-      color: #7c9eff;
-    }
-    .post-badge.ctf {
-      background: rgba(255, 107, 107, 0.14);
-      color: #ff6b6b;
-    }
+    .post-badge.dev { background: rgba(46, 230, 194, 0.14); color: #2ee6c2; }
+    .post-badge.forensics { background: rgba(124, 158, 255, 0.16); color: #7c9eff; }
+    .post-badge.ctf { background: rgba(255, 107, 107, 0.14); color: #ff6b6b; }
     .recent-title {
       margin: 0;
       font-size: 18px;
@@ -261,44 +268,52 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .site-footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
+    .site-footer { border-top: 1px solid rgba(255, 255, 255, 0.1); }
     .footer-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 32px 0;
+      padding: 16px 0;
       font-size: 14px;
       color: rgba(255, 255, 255, 0.62);
     }
-    .footer-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    @media (max-width: 1024px) {
-      .category-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
 
-      .recent-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 1024px) {
+      .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .recent-grid { grid-template-columns: 1fr; }
     }
+
     @media (max-width: 768px) {
       .container { width: min(100% - 32px, 1120px); }
-      .header-inner { flex-wrap: wrap; }
-      .site-nav { width: 100%; justify-content: flex-end; }
+      .brand {
+        font-size: 15px;
+        gap: 6px;
+        white-space: nowrap;
+      }
+      .brand img {
+        width: 20px;
+        height: 20px;
+      }
+      .header-inner {
+        flex-wrap: nowrap;
+        gap: 12px;
+      }
+      .site-nav {
+        width: auto;
+        justify-content: flex-end;
+        gap: 12px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
       .intro-card { padding: 16px; }
       .intro-grid {
         grid-template-columns: 1fr;
         justify-items: start;
       }
       .intro-title { font-size: 28px; }
-      .category-grid,
-      .recent-grid { grid-template-columns: 1fr; }
+      .category-grid, .recent-grid { grid-template-columns: 1fr; }
       .recent-layout {
         flex-direction: row;
         align-items: center;
@@ -308,10 +323,6 @@
         height: 70px;
         flex-shrink: 0;
         order: 2;
-      }
-      .recent-body {
-        flex: 1;
-        min-width: 0;
       }
       .footer-inner {
         flex-direction: column;
@@ -323,12 +334,15 @@
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a href="/index.html" class="brand">soeun4159</a>
+      <a href="/index.html" class="brand">
+        <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80" alt="profile" />
+        soeun4159 | Security Blog
+      </a>
       <nav class="site-nav">
-        <a href="/index.html">Home</a>
+        <a href="/index.html" class="active">Home</a>
         <a href="/about.html">About</a>
         <a href="/posts.html">Post</a>
-        <button class="search-btn" aria-label="search">
+        <button class="search-btn" aria-label="search" onclick="location.href='/posts.html?search=open'">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2.2"/>
             <path d="M16 16L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
@@ -343,7 +357,7 @@
       <div class="section-heading">
         <p class="section-label">Introduction</p>
       </div>
-      <div class="glow-card intro-card">
+      <div class="glow-card intro-card" data-link="/about.html">
         <div class="card-content intro-grid">
           <div class="profile-image">
             <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80" alt="profile" />
@@ -364,43 +378,49 @@
         <p class="section-label">Categories</p>
         <h2 class="section-title">카테고리</h2>
       </div>
+
       <div class="category-grid">
-        <div class="glow-card category-card dev">
+        <div class="glow-card category-card dev" onclick="location.href='/posts.html?category=개발'">
           <div class="card-content">
             <h3>개발</h3>
             <p class="category-desc">개발 관련 기록과 학습 정리</p>
             <p class="category-posts"><span>0</span> Posts</p>
           </div>
         </div>
-        <div class="glow-card category-card ctf">
+
+        <div class="glow-card category-card ctf" onclick="location.href='/posts.html?category=CTF/Wargame'">
           <div class="card-content">
             <h3>CTF/Wargame</h3>
             <p class="category-desc">CTF 및 워게임 풀이 기록</p>
             <p class="category-posts"><span>0</span> Posts</p>
           </div>
         </div>
-        <div class="glow-card category-card bugbounty">
+
+        <div class="glow-card category-card bugbounty" onclick="location.href='/posts.html?category=BugBounty'">
           <div class="card-content">
             <h3>BugBounty</h3>
             <p class="category-desc">버그바운티 경험과 취약점 분석</p>
             <p class="category-posts"><span>0</span> Posts</p>
           </div>
         </div>
-        <div class="glow-card category-card blog">
+
+        <div class="glow-card category-card blog" onclick="location.href='/posts.html?category=블로그/기술문서'">
           <div class="card-content">
             <h3>블로그/기술문서</h3>
             <p class="category-desc">기술 문서 및 글쓰기 기록</p>
             <p class="category-posts"><span>0</span> Posts</p>
           </div>
         </div>
-        <div class="glow-card category-card paper">
+
+        <div class="glow-card category-card paper" onclick="location.href='/posts.html?category=논문/컨퍼런스'">
           <div class="card-content">
             <h3>논문/컨퍼런스</h3>
             <p class="category-desc">논문 및 컨퍼런스 정리</p>
             <p class="category-posts"><span>0</span> Posts</p>
           </div>
         </div>
-        <div class="glow-card category-card cert">
+
+        <div class="glow-card category-card cert" onclick="location.href='/posts.html?category=공모전/자격증'">
           <div class="card-content">
             <h3>공모전/자격증</h3>
             <p class="category-desc">대회 및 자격증 준비 과정</p>
@@ -415,43 +435,46 @@
         <p class="section-label">Recent</p>
         <h2 class="section-title">Recent Posts</h2>
       </div>
+
       <div class="recent-grid">
-        <div class="glow-card recent-card">
+        <article class="glow-card recent-card" data-link="/posts/post1.html">
           <div class="card-content recent-layout">
             <div class="recent-thumb">
               <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80" alt="웹 취약점 분석 기록 템플릿" />
             </div>
             <div class="recent-body">
               <span class="post-badge dev">개발</span>
-              <h3 class="recent-title">웹 취약점 분석 기록 템플릿</h3>
+              <h3 class="recent-title"><a href="/posts/post1.html">웹 취약점 분석 기록 템플릿</a></h3>
               <p class="recent-text">문제 풀이부터 재현, 원인 분석, 방어 포인트까지 한 번에 정리할 수 있는 개인용 기록 포맷을 만들었습니다.</p>
             </div>
           </div>
-        </div>
-        <div class="glow-card recent-card">
+        </article>
+
+        <article class="glow-card recent-card" data-link="/posts/post2.html">
           <div class="card-content recent-layout">
             <div class="recent-thumb">
               <img src="https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=900&q=80" alt="디지털 포렌식 입문 메모" />
             </div>
             <div class="recent-body">
               <span class="post-badge forensics">포렌식</span>
-              <h3 class="recent-title">디지털 포렌식 입문 메모</h3>
+              <h3 class="recent-title"><a href="/posts/post2.html">디지털 포렌식 입문 메모</a></h3>
               <p class="recent-text">아티팩트, 로그, 타임라인 관점에서 초반에 꼭 잡아야 했던 포인트들을 짧게 정리했습니다.</p>
             </div>
           </div>
-        </div>
-        <div class="glow-card recent-card">
+        </article>
+
+        <article class="glow-card recent-card" data-link="/posts/post3.html">
           <div class="card-content recent-layout">
             <div class="recent-thumb">
               <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80" alt="CTF 풀이를 블로그 글로 바꾸는 법" />
             </div>
             <div class="recent-body">
               <span class="post-badge ctf">CTF/Wargame</span>
-              <h3 class="recent-title">CTF 풀이를 블로그 글로 바꾸는 법</h3>
+              <h3 class="recent-title"><a href="/posts/post3.html">CTF 풀이를 블로그 글로 바꾸는 법</a></h3>
               <p class="recent-text">풀이를 그냥 기록으로 끝내지 않고 다른 사람도 읽기 좋은 기술 문서 형태로 다듬는 과정을 정리했습니다.</p>
             </div>
           </div>
-        </div>
+        </article>
       </div>
     </section>
   </main>
@@ -460,7 +483,7 @@
     <div class="container footer-inner">
       <div class="footer-links">
         <a href="https://github.com/">github</a>
-        <a href="mailto:your@email.com">email</a>
+        <a href="mailto:soeun4159@email.com">email</a>
         <a href="https://discord.com/">discord</a>
         <a href="https://instagram.com/">instagram</a>
       </div>
@@ -477,9 +500,25 @@
         card.style.setProperty('--x', `${x}px`);
         card.style.setProperty('--y', `${y}px`);
       });
+
       card.addEventListener('mouseleave', () => {
         card.style.setProperty('--x', '50%');
         card.style.setProperty('--y', '50%');
+      });
+    });
+
+    document.querySelectorAll('.recent-card').forEach((card) => {
+      card.addEventListener('click', (event) => {
+        if (event.target.closest('a')) return;
+        const link = card.dataset.link;
+        if (link) window.location.href = link;
+      });
+    });
+
+    document.querySelectorAll('.intro-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        const link = card.dataset.link;
+        if (link) window.location.href = link;
       });
     });
   </script>
