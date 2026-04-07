@@ -17,20 +17,32 @@
       color: #ffffff;
     }
     a { color: inherit; text-decoration: none; }
-    .container { width: min(1120px, calc(100% - 64px)); margin: 0 auto; }
+    button { font: inherit; }
+    .container {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
     .site-header {
-      position: sticky; top: 0; z-index: 1000; background: #000;
-      border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(18px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #000000;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(18px);
     }
     .header-inner {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 20px; padding: 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
     }
     .brand, .site-nav { font-family: "JetBrains Mono", monospace; }
     .brand {
       display: flex;
       align-items: center;
-      gap: 8px;
       font-size: 18px;
       font-weight: 600;
       color: #fff;
@@ -41,8 +53,22 @@
       height: 24px;
       border-radius: 50%;
       object-fit: cover;
+      margin-right: 10px;
     }
-    .site-nav { display: flex; align-items: center; gap: 20px; font-size: 14px; color: rgba(255,255,255,0.82); }
+    .brand span { margin-left: 6px; }
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.82);
+    }
+    .site-nav a, .footer-links a {
+      transition: color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+    .site-nav a:hover, .footer-links a:hover, .site-nav a.active {
+      color: #2ee6c2;
+    }
     .search-btn {
       display: inline-flex;
       align-items: center;
@@ -54,54 +80,148 @@
       background: transparent;
       color: rgba(255,255,255,0.92);
       cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
     }
     .search-btn svg {
       width: 22px;
       height: 22px;
+      display: block;
     }
-    .site-nav a, .footer-links a { transition: color .2s ease; }
-    .site-nav a:hover, .footer-links a:hover, .site-nav a.active { color: #2ee6c2; }
-    .main { padding: 24px 0 32px; display: flex; flex-direction: column; gap: 40px; }
+    .main {
+      padding: 24px 0 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
     .section-heading { margin-bottom: 12px; }
     .section-label {
-      margin: 0; font-size: 13px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: .24em; color: #2ee6c2;
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .24em;
+      color: #2ee6c2;
     }
-    .section-title { margin: 8px 0 0; font-size: 30px; font-weight: 600; color: #fff; }
+    .section-title {
+      margin: 8px 0 0;
+      font-size: 30px;
+      font-weight: 600;
+      color: #fff;
+    }
     .glow-card {
-      position: relative; overflow: hidden; border-radius: 24px;
-      border: 1px solid var(--card-border, rgba(255,255,255,0.1));
-      background: #fff; transition: transform .25s ease, box-shadow .25s ease;
-      --x: 50%; --y: 50%;
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -1px 0 rgba(255,255,255,0.04);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      --x: 50%;
+      --y: 50%;
     }
-    .glow-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.14); }
+    .glow-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      background: linear-gradient(120deg, rgba(255,255,255,0.15), transparent 40%, transparent 60%, rgba(255,255,255,0.08));
+      opacity: 0.6;
+    }
     .glow-card::before {
-      content: ""; position: absolute; inset: 0;
-      background: radial-gradient(180px circle at var(--x) var(--y), rgba(46,230,194,.2), transparent 60%);
-      opacity: 0; transition: opacity .16s ease; pointer-events: none;
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(180px circle at var(--x) var(--y), rgba(46,230,194,0.2), transparent 60%);
+      opacity: 0;
+      transition: opacity .16s ease;
+      pointer-events: none;
+    }
+    .glow-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(46,230,194,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.12);
     }
     .glow-card:hover::before { opacity: 1; }
     .card-content { position: relative; z-index: 1; }
     .hero-card { padding: 20px 24px; }
     .hero-grid {
-      display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 20px; align-items: center;
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 28px;
+      align-items: center;
     }
     .profile-image {
-      width: 180px; height: 180px; border-radius: 50%; overflow: hidden;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      overflow: hidden;
       background: rgba(255,255,255,0.06);
+      flex-shrink: 0;
     }
-    .profile-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .hero-title { margin: 0; font-size: 40px; line-height: 1.2; font-weight: 700; color: #111; }
-    .hero-text { margin: 14px 0 0; font-size: 16px; line-height: 1.9; color: rgba(0,0,0,.72); }
-    .info-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; }
+    .profile-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hero-title {
+      margin: 0;
+      font-size: 40px;
+      line-height: 1.2;
+      font-weight: 700;
+      color: #fff;
+    }
+    .hero-text {
+      margin: 14px 0 0;
+      font-size: 16px;
+      line-height: 1.9;
+      color: rgba(255,255,255,.72);
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 20px;
+    }
     .info-card { padding: 20px; }
-    .info-card h3 { margin: 0; font-size: 22px; color: #111; }
-    .info-card p, .info-card li { color: rgba(0,0,0,.7); line-height: 1.8; font-size: 15px; }
-    .info-card ul { margin: 12px 0 0; padding-left: 18px; }
-    .stack-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .info-card h3 {
+      margin: 0;
+      font-size: 22px;
+      color: #fff;
+    }
+    .info-card p,
+    .info-card li {
+      color: rgba(255,255,255,.72);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+    .info-card ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+    }
+    .stack-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
     .stack-tag {
-      display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 13px; font-weight: 500;
-      background: rgba(46,230,194,.14); color: #0f8d78;
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      background: rgba(46,230,194,.14);
+      color: #2ee6c2;
+      border: 1px solid rgba(46,230,194,.18);
     }
     .timeline-wrap {
       position: relative;
@@ -114,7 +234,7 @@
       top: 0;
       bottom: 0;
       width: 2px;
-      background: #2ee6c2;
+      background: linear-gradient(to bottom, rgba(46,230,194,0.15), #2ee6c2, rgba(46,230,194,0.15));
       transform: translateX(-50%);
     }
     .timeline-row {
@@ -125,20 +245,47 @@
     .timeline-row + .timeline-row {
       margin-top: 28px;
     }
+    .timeline-row.left { justify-content: flex-start; }
+    .timeline-row.right { justify-content: flex-end; }
     .timeline-card {
       position: relative;
       width: calc(50% - 26px);
-      background: #ffffff;
-      border: 1px solid rgba(255,255,255,0.1);
       border-radius: 20px;
       padding: 16px 18px;
-      color: #111111;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.28),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+      color: #fff;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      --x: 50%;
+      --y: 50%;
     }
-    .timeline-row.left {
-      justify-content: flex-start;
+    .timeline-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(180px circle at var(--x) var(--y), rgba(46,230,194,0.2), transparent 60%);
+      opacity: 0;
+      transition: opacity .16s ease;
+      pointer-events: none;
+      border-radius: 20px;
     }
-    .timeline-row.right {
-      justify-content: flex-end;
+    .timeline-card:hover::before { opacity: 1; }
+    .timeline-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(46,230,194,0.25);
+    }
+    .timeline-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(46,230,194,0.25);
     }
     .timeline-card::after {
       content: "";
@@ -150,38 +297,40 @@
       background: #2ee6c2;
       box-shadow: 0 0 0 4px rgba(46,230,194,0.18);
     }
-    .timeline-row.left .timeline-card::after {
-      right: -32px;
-    }
-    .timeline-row.right .timeline-card::after {
-      left: -32px;
-    }
+    .timeline-row.left .timeline-card::after { right: -32px; }
+    .timeline-row.right .timeline-card::after { left: -32px; }
     .timeline-year {
       margin: 0;
       font-size: 18px;
       font-weight: 700;
-      color: #111111;
+      color: #fff;
     }
     .timeline-text {
       margin: 8px 0 0;
-      color: rgba(0,0,0,.68);
+      color: rgba(255,255,255,.68);
       line-height: 1.75;
       font-size: 15px;
     }
     .site-footer { border-top: 1px solid rgba(255,255,255,0.1); }
     .footer-inner {
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      padding: 32px 0; font-size: 14px; color: rgba(255,255,255,.62);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      font-size: 14px;
+      color: rgba(255,255,255,.62);
     }
     .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+
     @media (max-width: 900px) {
       .hero-grid, .info-grid { grid-template-columns: 1fr; }
     }
+
     @media (max-width: 768px) {
-      .container { width: min(100% - 32px, 1120px); }
+      .container { width: min(100% - 24px, 1120px); }
       .brand {
         font-size: 15px;
-        gap: 6px;
         white-space: nowrap;
       }
       .brand img {
@@ -199,6 +348,12 @@
         font-size: 13px;
         white-space: nowrap;
       }
+      .hero-card { padding: 16px; }
+      .hero-grid {
+        grid-template-columns: 1fr;
+        justify-items: start;
+      }
+      .hero-title { font-size: 30px; }
       .timeline-wrap::before {
         left: 12px;
         transform: none;
@@ -217,7 +372,10 @@
         left: -26px;
         right: auto;
       }
-      .footer-inner { flex-direction: column; align-items: center; }
+      .footer-inner {
+        flex-direction: column;
+        align-items: center;
+      }
     }
   </style>
 </head>
@@ -225,15 +383,15 @@
   <header class="site-header">
     <div class="container header-inner">
       <a href="/index.html" class="brand">
-        <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80" alt="profile" />
-        soeun4159 | Security Blog
+        <img src="/images/profile.jpg" alt="profile" />
+        <span>soeun4159 | Security Blog</span>
       </a>
       <nav class="site-nav">
         <a href="/index.html">Home</a>
         <a href="/about.html" class="active">About</a>
         <a href="/posts.html">Post</a>
-        <button class="search-btn" aria-label="search">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <button class="search-btn" aria-label="search" onclick="location.href='/posts.html?search=open'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2.2"/>
             <path d="M16 16L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
           </svg>
@@ -245,13 +403,32 @@
   <main class="main container">
     <section>
       <div class="section-heading">
-        <p class="section-label">FOCUS</p>
+        <p class="section-label">About</p>
+        <h2 class="section-title">소개</h2>
+      </div>
+      <div class="glow-card hero-card">
+        <div class="card-content hero-grid">
+          <div class="profile-image">
+            <img src="/images/profile.jpg" alt="profile" />
+          </div>
+          <div>
+            <h1 class="hero-title">soeun</h1>
+            <p class="hero-text">This blog focuses on web security and digital forensics, documenting study notes, CTF/Wargame write-ups, and summaries of technical papers. I prefer deepening my understanding by writing and organizing what I learn rather than just solving problems.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-heading">
+        <p class="section-label">Focus</p>
+        <h2 class="section-title">관심 분야</h2>
       </div>
       <div class="info-grid">
         <div class="glow-card info-card">
           <div class="card-content">
             <h3>관심 분야</h3>
-            <p>웹 애플리케이션 취약점 분석, CTF/Wargame 풀이 기록, 디지털 포렌식 기초와 아티팩트 분석에 관심이 있습니다. 기술을 배우는 것에서 끝나지 않고, 직접 정리하고 글로 풀어내면서 더 깊게 이해하는 방식을 좋아합니다.</p>
+            <p>I’m interested in web application vulnerability analysis, CTF/Wargame write-ups, and digital forensics fundamentals and artifact analysis. I like to deepen my understanding by documenting and explaining what I learn.</p>
             <div class="stack-list">
               <span class="stack-tag">Web Security</span>
               <span class="stack-tag">Digital Forensics</span>
@@ -265,10 +442,12 @@
           <div class="card-content">
             <h3>이 블로그에서 다루는 것</h3>
             <ul>
-              <li>보안 공부 기록과 정리</li>
-              <li>CTF/Wargame 풀이와 회고</li>
-              <li>포렌식 관련 기초 개념 및 실습 정리</li>
-              <li>논문, 기술 문서, 컨퍼런스 내용 요약</li>
+              <li>Development logs and project notes</li>
+              <li>CTF/Wargame write-ups and retrospectives</li>
+              <li>Bug bounty experiences and vulnerability analysis</li>
+              <li>Technical writing and blog posts</li>
+              <li>Paper and conference summaries</li>
+              <li>Contests and certifications</li>
             </ul>
           </div>
         </div>
@@ -278,30 +457,39 @@
     <section>
       <div class="section-heading">
         <p class="section-label">Journey</p>
+        <h2 class="section-title">기록의 흐름</h2>
       </div>
       <div class="timeline-wrap">
         <div class="timeline-row left">
           <div class="timeline-card">
-            <h4 class="timeline-year">2023</h4>
-            <p class="timeline-text">보안 분야에 관심을 가지고 기초 개념과 기본 실습을 시작했습니다.</p>
+            <h4 class="timeline-year">2024</h4>
+            <p class="timeline-text">Built problem-solving workflows and documentation habits through CTFs and wargames.</p>
           </div>
         </div>
         <div class="timeline-row right">
           <div class="timeline-card">
             <h4 class="timeline-year">2024</h4>
-            <p class="timeline-text">CTF와 워게임을 꾸준히 풀면서 문제 해결 흐름과 기록 습관을 쌓았습니다.</p>
+            <p class="timeline-text">Started writing structured notes and organizing solutions into reusable formats.</p>
           </div>
         </div>
+
         <div class="timeline-row left">
           <div class="timeline-card">
             <h4 class="timeline-year">2025</h4>
-            <p class="timeline-text">웹 해킹과 디지털 포렌식 분야를 중심으로 관심 분야를 더 구체화했습니다.</p>
+            <p class="timeline-text">Narrowed focus to web hacking and digital forensics.</p>
           </div>
         </div>
         <div class="timeline-row right">
           <div class="timeline-card">
+            <h4 class="timeline-year">2025</h4>
+            <p class="timeline-text">Deepened understanding through hands-on labs and real-case analysis.</p>
+          </div>
+        </div>
+
+        <div class="timeline-row left">
+          <div class="timeline-card">
             <h4 class="timeline-year">2026</h4>
-            <p class="timeline-text">학습 내용과 경험을 정리하기 위해 블로그를 만들고 기록을 체계화하기 시작했습니다.</p>
+            <p class="timeline-text">Started this blog to organize learning and systematize records.</p>
           </div>
         </div>
       </div>
@@ -311,22 +499,23 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-links">
-        <a href="https://github.com/">github</a>
-        <a href="mailto:your@email.com">email</a>
-        <a href="https://discord.com/">discord</a>
-        <a href="https://instagram.com/">instagram</a>
+        <a href="https://github.com/soeun4159">github</a>
+        <a href="mailto:soeun4159@gmail.com">email</a>
+        <a href="https://discord.com/users/soeun_4159">discord</a>
+        <a href="https://instagram.com/nueosse">instagram</a>
       </div>
       <p>© 2026 Soeun Security Blog. Built with GitHub Pages.</p>
     </div>
   </footer>
 
   <script>
-    document.querySelectorAll('.glow-card').forEach((card) => {
+    document.querySelectorAll('.glow-card, .timeline-card').forEach((card) => {
       card.addEventListener('mousemove', (event) => {
         const rect = card.getBoundingClientRect();
         card.style.setProperty('--x', `${event.clientX - rect.left}px`);
         card.style.setProperty('--y', `${event.clientY - rect.top}px`);
       });
+
       card.addEventListener('mouseleave', () => {
         card.style.setProperty('--x', '50%');
         card.style.setProperty('--y', '50%');
