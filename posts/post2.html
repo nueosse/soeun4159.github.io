@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>지금까지 한 활동 정리 | 소은 Security Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom, #0b1220, #0f2f2a);
+      color: #ffffff;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    .container {
+      width: min(1120px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #000000;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(18px);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .brand, .site-nav { font-family: "JetBrains Mono", monospace; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .brand span { margin-left: 6px; }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.82);
+      white-space: nowrap;
+    }
+
+    .site-nav a, .footer-links a {
+      transition: color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .site-nav a:hover, .footer-links a:hover, .site-nav a.active {
+      color: #2ee6c2;
+    }
+
+    .search-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      color: rgba(255,255,255,0.92);
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .search-btn svg { width: 22px; height: 22px; display: block; }
+
+    .main {
+      padding: 24px 0 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .section-label {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: #2ee6c2;
+    }
+
+    .section-title {
+      margin: 8px 0 0;
+      font-size: 34px;
+      line-height: 1.3;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .glow-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -1px 0 rgba(255,255,255,0.04);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      --x: 50%;
+      --y: 50%;
+    }
+
+    .glow-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      background: linear-gradient(120deg, rgba(255,255,255,0.15), transparent 40%, transparent 60%, rgba(255,255,255,0.08));
+      opacity: 0.6;
+    }
+
+    .glow-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(180px circle at var(--x) var(--y), rgba(46,230,194,0.2), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.16s ease;
+      pointer-events: none;
+    }
+
+    .glow-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(46,230,194,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+
+    .glow-card:hover::before { opacity: 1; }
+    .card-content { position: relative; z-index: 1; }
+
+    .post-hero {
+      padding: 32px 28px 28px;
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 8px 0 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255,107,107,0.14);
+      color: #ff6b6b;
+      border: 1px solid rgba(255,107,107,0.18);
+    }
+
+    .post-date,
+    .post-readtime {
+      font-size: 13px;
+      color: rgba(255,255,255,0.58);
+    }
+
+    .post-summary {
+      margin: 18px 0 0;
+      font-size: 16px;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-cover {
+      padding: 16px;
+    }
+
+    .post-cover img {
+      width: 100%;
+      display: block;
+      border-radius: 18px;
+      object-fit: cover;
+      max-height: 420px;
+    }
+
+    .content-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .post-content {
+      padding: 26px 28px;
+    }
+
+    .post-content h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      color: #ffffff;
+    }
+
+    .post-content h3 {
+      margin: 28px 0 12px;
+      font-size: 20px;
+      color: #ffffff;
+    }
+
+    .post-content p,
+    .post-content li {
+      font-size: 15px;
+      line-height: 1.95;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-content ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .code-block {
+      margin: 14px 0;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.08);
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.84);
+      white-space: pre-wrap;
+    }
+
+    .note-box {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255,209,102,0.08);
+      border: 1px solid rgba(255,209,102,0.16);
+      color: rgba(255,255,255,0.78);
+    }
+
+    .activity-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .activity-item {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .activity-item h4 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      color: #ffffff;
+    }
+
+    .activity-item p {
+      margin: 0;
+      color: rgba(255,255,255,0.72);
+    }
+
+    .post-aside {
+      padding: 20px;
+      position: sticky;
+      top: 96px;
+    }
+
+    .post-aside h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      color: #ffffff;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toc-list a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.68);
+      transition: color .2s ease;
+    }
+
+    .toc-list a:hover { color: #2ee6c2; }
+
+    .bottom-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .nav-card {
+      padding: 18px 20px;
+    }
+
+    .nav-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #2ee6c2;
+    }
+
+    .nav-title {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #ffffff;
+    }
+
+    .site-footer {
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      font-size: 14px;
+      color: rgba(255,255,255,0.62);
+    }
+
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+
+    @media (max-width: 1024px) {
+      .content-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .post-aside {
+        position: static;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        width: min(1120px, calc(100% - 48px));
+      }
+
+      .brand {
+        font-size: 15px;
+        white-space: nowrap;
+      }
+
+      .brand img {
+        width: 20px;
+        height: 20px;
+      }
+
+      .header-inner {
+        flex-wrap: nowrap;
+        gap: 12px;
+      }
+
+      .site-nav {
+        width: auto;
+        justify-content: flex-end;
+        gap: 12px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .main {
+        padding: 24px 0 80px;
+      }
+
+      .post-hero,
+      .post-content,
+      .post-aside,
+      .nav-card {
+        padding: 18px;
+      }
+
+      .section-title {
+        font-size: 28px;
+      }
+
+      .bottom-nav {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="brand">
+        <img src="/images/profile.jpg" alt="profile" />
+        <span>soeun4159 | Security Blog</span>
+      </a>
+      <nav class="site-nav">
+        <a href="/index.html">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/posts.html" class="active">Post</a>
+        <button class="search-btn" aria-label="search" onclick="location.href='/posts.html?search=open'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2.2"/>
+            <path d="M16 16L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main container">
+    <section class="glow-card post-hero">
+      <div class="card-content">
+        <p class="section-label">Post</p>
+        <div class="post-meta">
+          <span class="badge">CTF/Wargame</span>
+          <span class="post-date">2026.04.08</span>
+          
+        </div>
+        <h1 class="section-title">지금까지 한 활동 정리</h1>
+        <p class="post-summary">
+          지금까지 참여했던 활동과 공부 흐름을 간단하게 정리해두는 글입니다.
+          어떤 경험을 해왔고, 그 안에서 무엇을 배우고 있는지 한 번에 돌아볼 수 있도록 기록해두고 싶었습니다.
+        </p>
+      </div>
+    </section>
+
+    <section class="glow-card post-cover">
+      <div class="card-content">
+        <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1400&q=80" alt="지금까지 한 활동 정리" />
+      </div>
+    </section>
+
+    <section class="content-wrap">
+      <article class="glow-card post-content">
+        <div class="card-content">
+          <h2 id="overview">개요</h2>
+          <p>
+            보안을 공부하면서 여러 활동에 참여했고, 그 과정에서 관심 분야도 조금씩 구체화되었습니다.
+            이 글은 지금까지 해온 경험들을 짧게 정리하고, 앞으로 어떤 방향으로 더 성장하고 싶은지를 돌아보기 위한 기록입니다.
+          </p>
+
+          <h3 id="activities">지금까지 참여한 활동</h3>
+          <div class="activity-list">
+            <div class="activity-item">
+              <h4>웹 보안 학습</h4>
+              <p>동아리 활동을 통해 웹 취약점의 구조와 기초지식에 대해 학습하였으며, 단순한 풀이보다는 구조와 원인 분석에 더 집중하고 있습니다.</p>
+            </div>
+            <div class="activity-item">
+              <h4>CTF / Wargame 풀이</h4>
+              <p>드림핵 외 여러 사이트를 접해보며 문제를 풀면서 풀이 과정을 남기는 습관을 만들었고, 실패한 시도까지 노션에 기록하려고 노력했습니다.
+              +학교에서 진행하는 교내 CTF에 2회 참가하여 우수상을 수상하였습니다.</p>
+            </div>
+            <div class="activity-item">
+              <h4>디지털 포렌식 관심 확장</h4>
+              <p>로그와 아티팩트를 통해 사건 흐름을 재구성하는 과정에 흥미를 느껴 빡공팟에 디지털 포렌식 트랙에 참가하게 되었고,
+                여기서 배운 개념과 실습을 통해 꾸준히 성장하려고 노력하고 있습니다.</p>
+            </div>
+            <div class="activity-item">
+              <h4>Knights Frontier 2기 참여</h4>
+              <p>학습과 실행을 함께 경험하는 과정 속에서 좋은 사람들과 함께 한층 더 성장할 수 있는 기회가 되었으면 좋겠습니다.</p>
+            </div>
+          </div>
+
+          <h3 id="summary">한눈에 보는 정리</h3>
+          <div class="code-block"><pre>## Activities so far
+- 웹 보안 학습 및 기록
+- CTF / Wargame 문제 풀이
+- 디지털 포렌식 분야 관심 확장
+- Knights Frontier 2기 참여
+
+## What I learning
+- 기록의 중요성
+- 과정 중심으로 정리하는 습관
+- 관심 분야를 구체화하는 경험
+
+## Next step
+- 블로그에 꾸준히 정리하기
+- 웹 / 포렌식 중심으로 더 깊게 공부하기</pre></div>
+
+          <h3 id="meaning">이 경험들이 의미 있었던 이유</h3>
+          <p>
+            각각의 활동은 완전히 다른 듯한 경험처럼 보이지만, 결국에는 모두 제가 어떤 분야에 더 흥미를 느끼는지 확인하게 해준 과정이었습니다.
+            문제를 풀고, 정리하고, 다시 복기하는 흐름이 점점 제 공부 방식으로 자리잡고 있다는 점이 가장 큰 변화였습니다.
+          </p>
+
+          <div class="note-box">
+            지금까지의 경험을 단순한 이력처럼 남기는 것이 아니라, 앞으로 어떤 방향으로 성장할지를 보여주는 기록으로 만들고 싶습니다.
+          </div>
+
+          <h3 id="future">앞으로의 방향</h3>
+          <p>
+            앞으로는 웹 보안과 디지털 포렌식을 중심으로 공부 범위를 더 선명하게 잡고,
+            각 활동에서 얻은 배움을 블로그 글로 남기면서 저만의 기록 체계를 만들어가고 싶습니다.
+          </p>
+
+          <h3 id="closing">마무리</h3>
+          <p>
+            지금까지의 활동은 아직 완성된 결과라기보다는, 앞으로 더 나아가기 위한 기반이라고 생각합니다.
+            작은 경험 하나하나를 꾸준히 정리하면서, 더 단단한 흐름으로 이어가고 싶습니다.
+          </p>
+        </div>
+      </article>
+
+      <aside class="glow-card post-aside">
+        <div class="card-content">
+          <h3>On this page</h3>
+          <nav class="toc-list">
+            <a href="#overview">개요</a>
+            <a href="#activities">지금까지 참여한 활동</a>
+            <a href="#summary">한눈에 보는 정리</a>
+            <a href="#meaning">이 경험들이 의미 있었던 이유</a>
+            <a href="#future">앞으로의 방향</a>
+            <a href="#closing">마무리</a>
+          </nav>
+        </div>
+      </aside>
+    </section>
+
+    <section class="bottom-nav">
+      <a href="/posts/post1.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">Previous post</span>
+          <span class="nav-title">블로그를 만들게 된 계기</span>
+        </div>
+      </a>
+      <a href="/posts.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">Back to posts</span>
+          <span class="nav-title">전체 글 목록으로 돌아가기</span>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/soeun4159">github</a>
+        <a href="mailto:soeun4159@gmail.com">email</a>
+        <a href="https://discord.com/users/soeun4159">discord</a>
+        <a href="https://instagram.com/nueosse">instagram</a>
+      </div>
+      <p>© 2026 Soeun Security Blog. Built with GitHub Pages.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.glow-card').forEach((card) => {
+      card.addEventListener('mousemove', (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        card.style.setProperty('--x', `${x}px`);
+        card.style.setProperty('--y', `${y}px`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--x', '50%');
+        card.style.setProperty('--y', '50%');
+      });
+    });
+  </script>
+</body>
+</html>
