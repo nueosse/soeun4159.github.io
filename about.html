@@ -19,10 +19,8 @@
     a { color: inherit; text-decoration: none; }
     button { font: inherit; }
     .container {
-      width: 100%;
-      max-width: 1120px;
+      width: min(1120px, calc(100% - 48px));
       margin: 0 auto;
-      padding: 0 16px;
     }
     .site-header {
       position: sticky;
@@ -328,7 +326,7 @@
     }
 
     @media (max-width: 768px) {
-      .container { width: min(100% - 24px, 1120px); }
+      .container { width: min(1120px, calc(100% - 48px)); }
       .brand {
         font-size: 15px;
         white-space: nowrap;
@@ -412,7 +410,7 @@
             <img src="/images/profile.jpg" alt="profile" />
           </div>
           <div>
-            <h1 class="hero-title">soeun</h1>
+            <h1 class="hero-title">소은 | Security Blog</h1>
             <p class="hero-text">This blog focuses on web security and digital forensics, documenting study notes, CTF/Wargame write-ups, and summaries of technical papers. I prefer deepening my understanding by writing and organizing what I learn rather than just solving problems.</p>
           </div>
         </div>
