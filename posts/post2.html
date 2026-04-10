@@ -332,7 +332,7 @@
 
     .bottom-nav {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px;
     }
 
@@ -572,6 +572,12 @@
         <div class="card-content">
           <span class="nav-label">Back to posts</span>
           <span class="nav-title">전체 글 목록으로 돌아가기</span>
+        </div>
+      </a>
+      <a href="/posts/post3.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">Next post</span>
+          <span class="nav-title">커리어패스 탐색 미션</span>
         </div>
       </a>
     </section>
