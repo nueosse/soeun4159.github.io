@@ -396,8 +396,8 @@
       <div class="card-content">
         <p class="section-label">POST</p>
         <div class="post-meta">
-          <span class="badge">CTF / Wargame</span>
-          <span class="post-date">2026.05.06</span>
+          <span class="badge ctf">CTF / Wargame</span>
+          <span class="post-date">2026.04.25</span>
           
         </div>
         <h1 class="section-title">[CTF] Hacktheon 예선 참가</h1>
@@ -429,7 +429,7 @@
           <p>아이디와 비밀번호를 입력받는 칸이 있었고, 간단하게 SQL Injection을 이용해 푸는 문제였다.</p>
 
           <div class="code-block">
-            <img src="/images/ctf1-1.jpg" alt="문제 화면" style="width:100%; border-radius:12px;" />
+            <img src="/images/ctf1-1.jpg" alt="문제 화면"/>
           </div>
 
           <h3>접근 과정</h3>
@@ -441,6 +441,8 @@
 
           <h3>Flag</h3>
           <div class="code-block"><pre>hacktheon2026{d0nt_f0rget_the_s1ng1e_qu0te}</pre></div>
+
+
 
           <h2 id="prob2">문제 2</h2>
           <div class="code-block"><pre>문제 이름 : Recover it!
@@ -455,12 +457,11 @@
           <div class="code-block">
             <pre>
           for (int i = 0; i < 64; i++) {
-    input[i] ^= i + 0x67;
-}
-
-if (memcmp(input, cmptable, 64) == 0)
-    puts("Correct");
-            </pre>
+              input[i] ^= i + 0x67;
+          }
+          
+          if (memcmp(input, cmptable, 64) == 0)
+              puts("Correct");</pre>
           </div>
           
           <p>따라서 입력값 → XOR 변형 → cmptable이랑 비교 하는 코드에서</p>
@@ -474,10 +475,10 @@ if (memcmp(input, cmptable, 64) == 0)
           <h3>Flag</h3>
           <div class="code-block"><pre>hacktheon2026{22c34e819d2800db605d9fdbc9ba9ab71d6b9175d6b3b016c49cd4624f545c3}</pre></div>
 
+          
           <h2 id="prob3">문제 3</h2>
           <div class="code-block"><pre>문제 이름 : voice over
-분야     : Ai
-          </pre></div>
+분야     : Ai</pre></div>
 
           <h3>문제 설명</h3>
           <p>이 문제는 Target Sentence 를 보고 비슷한 목소리의 음성파일을 업로드하여 목소리와 텍스트가 일치하면 플래그가 출력되는 구조다.</p>
@@ -500,6 +501,7 @@ if (memcmp(input, cmptable, 64) == 0)
           <h3>Flag</h3>
           <div class="code-block"><pre>hacktheon2026{b7d30e21e4106a6ca4d451a218f15a97}</pre></div>
 
+          
           <h2 id="retrospect">마무리</h2>
           <p>
             세 문제를 풀면서 ai 에 많이 의지하며 문제를 풀었다.
