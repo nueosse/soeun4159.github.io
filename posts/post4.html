@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CTF Write-up | 소은 Security Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom, #0b1220, #0f2f2a);
+      color: #ffffff;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    .container {
+      width: min(1120px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #000000;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(18px);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .brand, .site-nav { font-family: "JetBrains Mono", monospace; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .brand span { margin-left: 6px; }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.82);
+      white-space: nowrap;
+    }
+
+    .site-nav a, .footer-links a {
+      transition: color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .site-nav a:hover, .footer-links a:hover, .site-nav a.active {
+      color: #2ee6c2;
+    }
+
+    .search-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      color: rgba(255,255,255,0.92);
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .search-btn svg { width: 22px; height: 22px; display: block; }
+
+    .main {
+      padding: 24px 0 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .section-label {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: #2ee6c2;
+    }
+
+    .section-title {
+      margin: 8px 0 0;
+      font-size: 34px;
+      line-height: 1.3;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .glow-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -1px 0 rgba(255,255,255,0.04);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      --x: 50%;
+      --y: 50%;
+    }
+
+    .glow-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      background: linear-gradient(120deg, rgba(255,255,255,0.15), transparent 40%, transparent 60%, rgba(255,255,255,0.08));
+      opacity: 0.6;
+    }
+
+    .glow-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(180px circle at var(--x) var(--y), rgba(46,230,194,0.2), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.16s ease;
+      pointer-events: none;
+    }
+
+    .glow-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(46,230,194,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+
+    .glow-card:hover::before { opacity: 1; }
+    .card-content { position: relative; z-index: 1; }
+
+    .post-hero { padding: 32px 28px 28px; }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 8px 0 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(46,230,194,0.14);
+      color: #2ee6c2;
+      border: 1px solid rgba(46,230,194,0.18);
+    }
+
+    .post-date, .post-readtime {
+      font-size: 13px;
+      color: rgba(255,255,255,0.58);
+    }
+
+    .post-summary {
+      margin: 18px 0 0;
+      font-size: 16px;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-cover { padding: 16px; }
+
+    .post-cover img {
+      width: 100%;
+      display: block;
+      border-radius: 18px;
+      object-fit: cover;
+      max-height: 420px;
+    }
+
+    .content-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .post-content { padding: 26px 28px; }
+
+    .post-content h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      color: #ffffff;
+    }
+
+    .post-content h3 {
+      margin: 28px 0 12px;
+      font-size: 20px;
+      color: #ffffff;
+    }
+
+    .post-content p, .post-content li {
+      font-size: 15px;
+      line-height: 1.95;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-content ul, .post-content ol {
+      margin: 0 0 12px;
+      padding-left: 20px;
+    }
+
+    .post-content code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.92em;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      color: #d8fff7;
+    }
+
+    .code-block {
+      margin: 14px 0;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.08);
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.84);
+      white-space: pre-wrap;
+    }
+
+    .note-box {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(46,230,194,0.08);
+      border: 1px solid rgba(46,230,194,0.16);
+      color: rgba(255,255,255,0.78);
+      line-height: 1.8;
+    }
+
+    .post-aside {
+      padding: 20px;
+      position: sticky;
+      top: 96px;
+    }
+
+    .post-aside h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      color: #ffffff;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toc-list a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.68);
+      transition: color .2s ease;
+    }
+
+    .toc-list a:hover { color: #2ee6c2; }
+
+    .bottom-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .nav-card { padding: 18px 20px; }
+
+    .nav-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #2ee6c2;
+    }
+
+    .nav-title {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #ffffff;
+    }
+
+    .site-footer { border-top: 1px solid rgba(255,255,255,0.1); }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      font-size: 14px;
+      color: rgba(255,255,255,0.62);
+    }
+
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+
+    @media (max-width: 1024px) {
+      .content-wrap { grid-template-columns: 1fr; }
+      .post-aside { position: static; }
+    }
+
+    @media (max-width: 768px) {
+      .container { width: min(1120px, calc(100% - 48px)); }
+      .brand { font-size: 15px; white-space: nowrap; }
+      .brand img { width: 20px; height: 20px; }
+      .header-inner { flex-wrap: nowrap; gap: 12px; }
+      .site-nav {
+        width: auto;
+        justify-content: flex-end;
+        gap: 12px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .main { padding: 24px 0 80px; }
+      .post-hero, .post-content, .post-aside, .nav-card { padding: 18px; }
+      .section-title { font-size: 28px; }
+      .bottom-nav { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="brand">
+        <img src="/images/profile.jpg" alt="profile" />
+        <span>soeun4159 | Security Blog</span>
+      </a>
+      <nav class="site-nav">
+        <a href="/index.html">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/posts.html" class="active">Post</a>
+        <button class="search-btn" aria-label="search" onclick="location.href='/posts.html?search=open'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2.2"/>
+            <path d="M16 16L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main container">
+    <section class="glow-card post-hero">
+      <div class="card-content">
+        <p class="section-label">POST</p>
+        <div class="post-meta">
+          <span class="badge">CTF / Wargame</span>
+          <span class="post-date">2026.05.06</span>
+          
+        </div>
+        <h1 class="section-title">[CTF] Hacktheon 예선 참가</h1>
+        <p class="post-summary">
+          문제를 해결하기 위해 어떤 관점으로 접근했고, 어떤 취약점 또는 핵심 로직을 이용했는지 정리한 라이트업입니다.
+        </p>
+      </div>
+    </section>
+
+    <section class="glow-card post-cover">
+      <div class="card-content">
+        <img src="/images/ctf.jpg" alt="문제 화면" style="width:100%; border-radius:12px;" />
+      </div>
+    </section>
+
+    <section class="content-wrap">
+      <article class="glow-card post-content">
+        <div class="card-content">
+          <h2 id="overview">개요</h2>
+          <p>
+            Hacktheon 예선에서 총 3개의 문제를 해결하였고, 각 문제의 접근 과정과 핵심 포인트를 정리합니다.
+          </p>
+
+          <h2 id="prob1">문제 1</h2>
+          <div class="code-block"><pre>문제 이름 : simple sqli
+분야     : Web</pre></div>
+
+          <h3>문제 설명</h3>
+          <p>아이디와 비밀번호를 입력받는 칸이 있었고, 간단하게 SQL Injection을 이용해 푸는 문제였다.</p>
+
+          <div class="code-block">
+            <img src="/images/ctf1-1.jpg" alt="문제 화면" style="width:100%; border-radius:12px;" />
+          </div>
+
+          <h3>접근 과정</h3>
+          <p>문제 파일을 보고 </p>
+          <p>admin' or '1'='1' --</p>
+          <p>admin' or '1=1'; #</p>
+          <p>등등을 시도하다가 role 이 admin 이 되어야 하는 것을 보고</p>
+          <p>admin' or role='admin' --  을 시도하였는데 플래그 값이 출력되었다.</p>
+
+          <h3>Flag</h3>
+          <div class="code-block"><pre>hacktheon2026{d0nt_f0rget_the_s1ng1e_qu0te}</pre></div>
+
+          <h2 id="prob2">문제 2</h2>
+          <div class="code-block"><pre>문제 이름 : Recover it!
+분야     : pwn</pre></div>
+
+          <h3>문제 설명</h3>
+          <p>문제에서 prob 파일을 제공하여 wsl 에서 해당 경로로 접근하여 푸는 문제였다.</p>
+
+          <h3>접근 과정</h3>
+          <p>풀이 과정</p>
+          <p>window 에서 wsl 을 이용하여 경로를 찾는 과정에서 좀 헤멨지만 IDA 로 prob 파일을 열어보니 아래 코드와 같이 입력값을 대조해서 Correct! 를 출력하는 것을 금방 알 수 있었다.</p>
+          <div class="code-block">
+            <pre>
+          for (int i = 0; i < 64; i++) {
+    input[i] ^= i + 0x67;
+}
+
+if (memcmp(input, cmptable, 64) == 0)
+    puts("Correct");
+            </pre>
+          </div>
+          
+          <p>따라서 입력값 → XOR 변형 → cmptable이랑 비교 하는 코드에서</p>
+          <p>정답 입력값은 아래와 같이 반대로 계산하면 된다.</p>
+          <p>입력값 = cmptable ^ (i + 0x67)</p>
+          <p>이걸 0번부터 63번까지 해서 전부 이어붙이면 Correct! 를 출력하는 것을 볼수 있다.</p>
+          <div class="code-block">
+            <img src="/images/ctf2-1.jpg" alt="문제 화면" style="width:100%; border-radius:12px;" />
+          </div>
+
+          <h3>Flag</h3>
+          <div class="code-block"><pre>hacktheon2026{22c34e819d2800db605d9fdbc9ba9ab71d6b9175d6b3b016c49cd4624f545c3}</pre></div>
+
+          <h2 id="prob3">문제 3</h2>
+          <div class="code-block"><pre>문제 이름 : voice over
+분야     : Ai
+          </pre></div>
+
+          <h3>문제 설명</h3>
+          <p>이 문제는 Target Sentence 를 보고 비슷한 목소리의 음성파일을 업로드하여 목소리와 텍스트가 일치하면 플래그가 출력되는 구조다.</p>
+          <div class="code-block">
+            <img src="/images/ctf3-1.jpg" alt="문제 화면" style="width:100%; border-radius:12px;" />
+          </div>
+
+          <h3>접근 과정</h3>
+          <p>풀이 과정</p>
+          <p>먼저 타켓 문장이 적혀진줄 모르고 문제에서 제공해준 샘플파일들을 넣어보았는데, text similarity 에서 낮은 숫자가 나와 플래그가 출력되지 않았다.</p>
+          <p>burp 로 request 조작이나 토큰이 중요한 줄 알고 여러 방법을 시도해보았지만 문제가 풀리지 않았다.</p>
+          <div class="code-block">
+            <img src="/images/ctf3-1.jpg" alt="문제 화면" style="width:100%; border-radius:12px;" />
+          </div>
+          <p>따라서 남은 방법은 진짜 목소리를 녹음하여 파일을 넣는 것이기 때문에 주어진 문장으로 음성 파일을 만들어주는 사이트를 찾아 제작하였더니 문제가 풀렸다.</p>
+          <div class="code-block">
+            <img src="/images/ctf3-2.jpg" alt="문제 화면" style="width:100%; border-radius:12px;" />
+          </div>
+
+          <h3>Flag</h3>
+          <div class="code-block"><pre>hacktheon2026{b7d30e21e4106a6ca4d451a218f15a97}</pre></div>
+
+          <h2 id="retrospect">마무리</h2>
+          <p>
+            세 문제를 풀면서 ai 에 많이 의지하며 문제를 풀었다.
+            이번이 핵테온에 참가한지 벌써 3회차라 많은 문제들을 풀고 싶었지만, 주어진 시간내에 정확한 방법으로 문제를 푸는게 쉽지많은 않았다.
+            포너블 문제도 풀어보고, 전보다는 미묘하게 늘었다고 느끼지만 아직 한참 갈길이 먼 것 같다.
+            따라서 앞으로 더 많은 문제들을 풀어보며 개념들을 정리하고, 분야별로 어떤 취약점들이 있는지 정확하게 정리하는 시간을 가져야 할 것 같다.
+          </p>
+
+          <div class="note-box">
+            핵테온 2026 예선 문제 풀이 끝 !
+          </div>
+        </div>
+        </div>
+      </article>
+
+      <aside class="glow-card post-aside">
+        <div class="card-content">
+          <h3>On this page</h3>
+          <nav class="toc-list">
+            <a href="#overview">개요</a>
+            <a href="#prob1">문제 1</a>
+            <a href="#prob2">문제 2</a>
+            <a href="#prob3">문제 3</a>
+            <a href="#retrospect">마무리</a>
+          </nav>
+        </div>
+      </aside>
+    </section>
+
+    <section class="bottom-nav">
+      <a href="/posts/post3.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">Previous post</span>
+          <span class="nav-title">커리어 패스 탐색 미션</span>
+        </div>
+      </a>
+      <a href="/posts.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">All posts</span>
+          <span class="nav-title">전체 글 목록으로 돌아가기</span>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/soeun4159">github</a>
+        <a href="mailto:soeun4159@email.com">email</a>
+        <a href="https://discord.com/users/soeun_4159">discord</a>
+        <a href="https://instagram.com/nueosse">instagram</a>
+      </div>
+      <p>© 2026 Soeun Security Blog. Built with GitHub Pages.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.glow-card').forEach((card) => {
+      card.addEventListener('mousemove', (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        card.style.setProperty('--x', `${x}px`);
+        card.style.setProperty('--y', `${y}px`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--x', '50%');
+        card.style.setProperty('--y', '50%');
+      });
+    });
+  </script>
+</body>
+</html>
