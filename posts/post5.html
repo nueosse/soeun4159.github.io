@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Git Study | 소은 Security Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom, #0b1220, #0f2f2a);
+      color: #ffffff;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    .container {
+      width: min(1120px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #000000;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(18px);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .brand, .site-nav { font-family: "JetBrains Mono", monospace; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .brand span { margin-left: 6px; }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.82);
+      white-space: nowrap;
+    }
+
+    .site-nav a, .footer-links a {
+      transition: color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .site-nav a:hover, .footer-links a:hover, .site-nav a.active {
+      color: #2ee6c2;
+    }
+
+    .search-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      color: rgba(255,255,255,0.92);
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .search-btn svg { width: 22px; height: 22px; display: block; }
+
+    .main {
+      padding: 12px 0 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-label {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: #2ee6c2;
+    }
+
+    .section-title {
+      margin: 8px 0 0;
+      font-size: 34px;
+      line-height: 1.3;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .glow-card, .topic-box, .section-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -1px 0 rgba(255,255,255,0.04);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      --x: 50%;
+      --y: 50%;
+    }
+
+    .glow-card::after, .topic-box::after, .section-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      background: linear-gradient(120deg, rgba(255,255,255,0.15), transparent 40%, transparent 60%, rgba(255,255,255,0.08));
+      opacity: 0.6;
+    }
+
+    .glow-card::before, .topic-box::before, .section-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(180px circle at var(--x) var(--y), rgba(46,230,194,0.2), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.16s ease;
+      pointer-events: none;
+    }
+
+    .glow-card:hover, .topic-box:hover, .section-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(46,230,194,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+
+    .glow-card:hover::before, .topic-box:hover::before, .section-card:hover::before { opacity: 1; }
+
+    .card-content { position: relative; z-index: 1; }
+
+    .post-hero { padding: 32px 28px 28px; }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 8px 0 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(46,230,194,0.14);
+      color: #2ee6c2;
+      border: 1px solid rgba(46,230,194,0.18);
+    }
+
+    .post-date, .post-readtime {
+      font-size: 13px;
+      color: rgba(255,255,255,0.58);
+    }
+
+    .post-summary {
+      margin: 18px 0 0;
+      font-size: 16px;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-cover { padding: 16px; }
+
+    .post-cover img {
+      width: 100%;
+      display: block;
+      border-radius: 18px;
+      object-fit: cover;
+      max-height: 420px;
+    }
+
+    .topic-box, .section-card {
+      margin: 16px 0;
+      padding: 26px 28px;
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .image-placeholder {
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      border: 1px dashed rgba(46,230,194,0.35);
+      background: rgba(0,0,0,0.22);
+      color: rgba(255,255,255,0.56);
+      font-size: 14px;
+      text-align: center;
+      padding: 18px;
+    }
+
+    .image-placeholder img {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+    }
+
+    .topic-title {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(46,230,194,0.12);
+      border: 1px solid rgba(46,230,194,0.18);
+      color: #2ee6c2;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .content-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .post-content {
+      padding: 0;
+    }
+
+    .post-content h2 {
+      margin: 18px 0 12px;
+      font-size: 24px;
+      color: #ffffff;
+    }
+
+    .post-content h3 {
+      margin: 28px 0 12px;
+      font-size: 20px;
+      color: #ffffff;
+    }
+
+    .post-content p, .post-content li {
+      font-size: 15px;
+      line-height: 1.95;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-content ul, .post-content ol {
+      margin: 0 0 12px;
+      padding-left: 20px;
+    }
+
+    .post-content code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.92em;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      color: #d8fff7;
+    }
+
+    .code-block {
+      margin: 14px 0;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.08);
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.84);
+      white-space: pre-wrap;
+    }
+
+    .note-box {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(46,230,194,0.08);
+      border: 1px solid rgba(46,230,194,0.16);
+      color: rgba(255,255,255,0.78);
+      line-height: 1.8;
+    }
+
+    .post-aside {
+      padding: 20px;
+      position: sticky;
+      top: 96px;
+    }
+
+    .post-aside h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      color: #ffffff;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toc-list a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.68);
+      transition: color .2s ease;
+    }
+
+    .toc-list a:hover { color: #2ee6c2; }
+
+    .bottom-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .nav-card { padding: 18px 20px; }
+
+    .nav-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #2ee6c2;
+    }
+
+    .nav-title {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #ffffff;
+    }
+
+    .site-footer { border-top: 1px solid rgba(255,255,255,0.1); }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      font-size: 14px;
+      color: rgba(255,255,255,0.62);
+    }
+
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+
+    @media (max-width: 1024px) {
+      .content-wrap { grid-template-columns: 1fr; }
+      .post-aside { position: static; }
+    }
+
+    @media (max-width: 768px) {
+      .container { width: min(1120px, calc(100% - 48px)); }
+      .brand { font-size: 15px; white-space: nowrap; }
+      .brand img { width: 20px; height: 20px; }
+      .header-inner { flex-wrap: nowrap; gap: 12px; }
+      .site-nav {
+        width: auto;
+        justify-content: flex-end;
+        gap: 12px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .main { padding: 24px 0 80px; }
+      .post-hero, .post-content, .post-aside, .nav-card { padding: 18px; }
+      .section-title { font-size: 28px; }
+      .bottom-nav { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="brand">
+        <img src="/images/profile.jpg" alt="profile" />
+        <span>soeun4159 | Security Blog</span>
+      </a>
+      <nav class="site-nav">
+        <a href="/index.html">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/posts.html" class="active">Post</a>
+        <button class="search-btn" aria-label="search" onclick="location.href='/posts.html?search=open'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2.2"/>
+            <path d="M16 16L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main container">
+    <section class="glow-card post-hero">
+      <div class="card-content">
+        <p class="section-label">POST</p>
+        <div class="post-meta">
+          <span class="badge">블로그 / 기술문서</span>
+          <span class="post-date">2026.05.25</span>
+        </div>
+        <h1 class="section-title">Git 배우기: 커밋부터 브랜치, 리베이스까지</h1>
+        <p class="post-summary">
+          Git의 기본 흐름과 주요 명령어를 정리한 학습 기록입니다. commit, branch, checkout, merge, rebase, reset, revert, cherry-pick처럼 자주 쓰이는 명령어를 중심으로 Git의 트리 구조와 협업 흐름을 이해하는 데 초점을 두었습니다.
+        </p>
+      </div>
+    </section>
+
+    <section class="glow-card post-cover">
+      <div class="card-content">
+        <img src="/images/git0.jpg" alt="Git 학습 대표 이미지" />
+      </div>
+    </section>
+
+    <section class="content-wrap">
+      <article class="post-content">
+          <div class="section-card">
+          <h2 id="overview">개요</h2>
+          <p>
+            Git은 프로젝트의 변경 이력을 기록하고 관리하는 버전 관리 시스템이다. 이번 학습에서는 단순히 명령어 사용법을 익히는 데서 그치지 않고, commit이 어떻게 연결되고 branch가 어떤 방식으로 이동하는지 Git의 내부 흐름을 이해하는 데 집중했다.
+          </p>
+          <p>
+            Learn Git Branching 환경을 활용해 commit 그래프의 변화를 직접 확인하면서 merge, rebase, reset, cherry-pick, push, pull 같은 주요 명령어가 실제로 어떤 변화를 만드는지 실습 중심으로 학습했다.
+          </p>
+
+          </div>
+
+          <div class="section-card">
+          <h2 id="objective">학습 Objective</h2>
+          <p>
+            이번 Git 학습의 핵심 목표는 단순히 명령어를 외우는 것이 아니라, Git이 commit과 branch를 기반으로 어떻게 동작하는지 구조적으로 이해하는 것이었다. 각 명령어를 실행했을 때 commit 그래프가 어떻게 변하는지 직접 확인하면서 Git의 흐름을 자연스럽게 익히는 데 집중했다.
+          </p>
+          <div class="code-block"><pre>핵심 목표
+- commit과 branch의 구조 이해하기
+- HEAD와 상대 참조를 통해 현재 위치 정확히 파악하기
+- merge와 rebase의 동작 방식과 차이 이해하기
+- reset / revert로 작업 되돌리기 익히기
+- cherry-pick과 interactive rebase로 commit 다루기
+- push / pull / fetch를 통한 원격 저장소 협업 흐름 이해하기</pre></div>
+
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">1. Git 기본</div>
+            <h2 id="git-basic">Git 기본</h2>
+            <p>
+              Git 기본 단계에서는 commit, branch, checkout, merge, rebase처럼 Git을 사용할 때 가장 먼저 익혀야 하는 명령어들을 배웠다. 이 단계의 핵심은 commit이 쌓이는 방식과 branch가 특정 commit을 가리키는 포인터라는 점을 이해하는 것이다.
+            </p>
+
+            <h3>commit</h3>
+            <p>
+              <code>git commit</code>은 현재 작업 내용을 하나의 기록으로 저장하는 명령어이다. Git에서 commit은 프로젝트의 특정 시점을 저장하는 스냅샷 역할을 한다.
+            </p>
+            <div class="code-block"><pre>git commit</pre></div>
+
+            <h3>branch</h3>
+            <p>
+              <code>git branch</code>는 새로운 작업 흐름을 만들 때 사용한다. branch는 commit을 복사하는 것이 아니라 특정 commit을 가리키는 이름표에 가깝다.
+            </p>
+            <div class="code-block"><pre>git branch newImage</pre></div>
+
+            <h3>checkout</h3>
+            <p>
+              <code>git checkout</code>은 이동 명령어이다. 특정 branch나 commit으로 이동할 때 사용하며, <code>-b</code> 옵션을 사용하면 branch 생성과 이동을 한 번에 할 수 있다.
+            </p>
+            <div class="code-block"><pre>git checkout main
+git checkout newImage
+git checkout -b bugFix</pre></div>
+
+            <h3>merge</h3>
+            <p>
+              <code>git merge</code>는 다른 branch의 작업 내용을 현재 branch로 합치는 명령어이다. 두 branch의 변경 이력을 보존하면서 합쳐지기 때문에 merge commit이 생길 수 있다.
+            </p>
+            <div class="code-block"><pre>git checkout main
+git merge bugFix</pre></div>
+
+            <h3>rebase</h3>
+            <p>
+              <code>git rebase</code>는 현재 branch의 commit들을 다른 branch의 최신 commit 뒤로 다시 쌓는 명령어이다. merge보다 히스토리를 더 깔끔하게 만들 수 있다.
+            </p>
+            <div class="code-block"><pre>git checkout bugFix
+git rebase main</pre></div>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">2. 다음 단계로</div>
+            <h2 id="next-step">다음 단계로</h2>
+            <p>
+              다음 단계에서는 HEAD, 상대 참조, branch 강제 이동, 작업 되돌리기를 배웠다. 이 부분은 현재 내가 Git 트리의 어디에 있는지 정확히 파악하는 데 중요하다.
+            </p>
+
+            <h3>HEAD와 Detached HEAD</h3>
+            <p>
+              HEAD는 현재 내가 보고 있는 위치를 의미한다. 보통은 branch를 가리키지만, 특정 commit으로 직접 이동하면 HEAD가 branch에서 분리된 Detached HEAD 상태가 된다.
+            </p>
+            <div class="code-block"><pre>git checkout C1</pre></div>
+
+            <h3>상대 참조</h3>
+            <p>
+              <code>^</code>는 부모 commit 하나를 가리키고, <code>~&lt;num&gt;</code>은 여러 단계 이전 commit을 가리킨다.
+            </p>
+            <div class="code-block"><pre>git checkout main^
+git checkout HEAD~4</pre></div>
+
+            <h3>branch 강제 이동</h3>
+            <p>
+              <code>git branch -f</code>를 사용하면 branch가 가리키는 위치를 원하는 commit으로 강제로 옮길 수 있다.
+            </p>
+            <div class="code-block"><pre>git branch -f main HEAD~3</pre></div>
+
+            <h3>reset과 revert</h3>
+            <p>
+              <code>git reset</code>은 branch가 가리키는 commit 위치를 이전으로 옮겨 local 작업을 되돌릴 때 사용하고, <code>git revert</code>는 기존 commit을 삭제하지 않고 되돌리는 commit을 새로 만들어 공유된 작업을 안전하게 되돌릴 때 사용한다.
+            </p>
+            <div class="code-block"><pre>git reset HEAD~1
+git revert HEAD</pre></div>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">3. 코드 이리저리 옮기기</div>
+            <h2 id="move-code">코드 이리저리 옮기기</h2>
+            <p>
+              이 단계에서는 원하는 commit만 골라 가져오거나, commit 순서를 바꾸는 방법을 배웠다. 전체 branch를 합치지 않고 필요한 변경 사항만 가져올 때 유용하다.
+            </p>
+
+            <h3>cherry-pick</h3>
+            <p>
+              <code>git cherry-pick</code>은 다른 branch에 있는 특정 commit만 현재 branch로 가져오는 명령어이다.
+            </p>
+            <div class="code-block"><pre>git cherry-pick C3 C4 C7</pre></div>
+
+            <h3>interactive rebase</h3>
+            <p>
+              <code>git rebase -i</code>는 여러 commit을 대화형으로 편집하는 명령어이다. commit 순서를 바꾸거나, 필요 없는 commit을 제거하거나, 여러 commit을 합치는 등 히스토리를 정리할 수 있다.
+            </p>
+            <div class="code-block"><pre>git rebase -i HEAD~4</pre></div>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">4. 종합선물세트</div>
+            <h2 id="mixed-set">종합선물세트</h2>
+            <p>
+              종합선물세트 단계에서는 cherry-pick, rebase -i, amend, tag, describe처럼 commit을 더 세밀하게 다루는 명령어들을 함께 정리했다.
+            </p>
+
+            <h3>amend</h3>
+            <p>
+              <code>git commit --amend</code>는 가장 최근 commit을 정정할 때 사용한다. 직전 commit 메시지나 내용을 수정할 때 유용하다.
+            </p>
+            <div class="code-block"><pre>git commit --amend</pre></div>
+
+            <h3>tag</h3>
+            <p>
+              <code>git tag</code>는 특정 commit에 이름표를 붙이는 명령어이다. 주로 버전 표시나 중요한 지점을 표시할 때 사용한다.
+            </p>
+            <div class="code-block"><pre>git tag v1 C1</pre></div>
+
+            <h3>describe</h3>
+            <p>
+              <code>git describe</code>는 특정 commit이 가장 가까운 tag로부터 얼마나 떨어져 있는지 알려준다. 결과는 <code>&lt;tag&gt;-&lt;numCommits&gt;-g&lt;hash&gt;</code> 형태로 나타난다.
+            </p>
+            <div class="code-block"><pre>git describe main
+
+# 예시
+v1-2-gC2</pre></div>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">5. 고급 문제</div>
+            <h2 id="advanced-problems">고급 문제</h2>
+            <p>
+              고급 문제에서는 여러 branch를 연속으로 rebase하거나, merge commit처럼 부모가 여러 개인 commit을 다루는 방법을 배웠다. 이 단계부터는 commit 그래프를 눈으로 보면서 명령어 결과를 예측하는 연습이 중요하다.
+            </p>
+
+            <h3>연속 rebase</h3>
+            <p>
+              여러 branch가 있을 때 기준 branch 위로 차례대로 rebase하여 전체 흐름을 정리할 수 있다. <code>git rebase main bugFix</code>처럼 쓰면 <code>bugFix</code> branch를 <code>main</code> 위로 옮긴다는 뜻이다.
+            </p>
+            <div class="code-block"><pre>git rebase main bugFix
+git rebase bugFix side
+git rebase side another</pre></div>
+
+            <h3>다수의 부모</h3>
+            <p>
+              merge commit은 부모 commit을 여러 개 가질 수 있다. 이때 <code>^</code>, <code>^2</code>, <code>~</code>를 조합해서 원하는 위치로 이동할 수 있다.
+            </p>
+            <div class="code-block"><pre>git checkout main^
+git checkout main^2
+git checkout HEAD~^2~2</pre></div>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">6. Push & Pull -- Git 원격저장소!</div>
+            <h2 id="push-pull">Push & Pull -- Git 원격저장소!</h2>
+            <p>
+              이 단계에서는 원격 저장소의 기본 흐름을 배웠다. 원격 저장소는 협업을 위해 사용하며, 로컬 저장소와 원격 저장소의 branch는 서로 따로 존재한다.
+            </p>
+
+            <h3>clone</h3>
+            <p>
+              <code>git clone</code>은 원격 저장소를 로컬 환경으로 복사하는 명령어이다.
+            </p>
+            <div class="code-block"><pre>git clone &lt;repository-url&gt;</pre></div>
+
+            <h3>remote branch</h3>
+            <p>
+              원격 branch는 학습 환경에서는 <code>o/main</code>, 실제 Git에서는 보통 <code>origin/main</code>처럼 표시된다.
+            </p>
+
+            <h3>fetch</h3>
+            <p>
+              <code>git fetch</code>는 원격 저장소의 최신 정보를 가져오지만, 현재 branch에 바로 합치지는 않는다.
+            </p>
+            <div class="code-block"><pre>git fetch</pre></div>
+
+            <h3>pull</h3>
+            <p>
+              <code>git pull</code>은 기본적으로 <code>git fetch</code>와 <code>git merge</code>를 합친 명령어이다. 현재 branch가 <code>origin/main</code>을 추적하고 있다면, 원격 변경 사항을 가져온 뒤 현재 branch에 병합한다.
+            </p>
+            <div class="code-block"><pre>git pull
+
+# 현재 branch가 origin/main을 추적하는 경우의 흐름
+git fetch
+git merge origin/main</pre></div>
+
+            <h3>push</h3>
+            <p>
+              <code>git push</code>는 내 로컬 commit을 원격 저장소에 업로드하는 명령어이다.
+            </p>
+            <div class="code-block"><pre>git push</pre></div>
+
+            <h3>엇갈린 히스토리</h3>
+            <p>
+              내가 작업하는 동안 다른 사람이 원격 저장소에 먼저 commit을 올리면 로컬과 원격의 히스토리가 엇갈릴 수 있다. 이때는 fetch 후 rebase 또는 merge로 원격 변경 사항을 먼저 반영한 뒤 push한다.
+            </p>
+            <div class="code-block"><pre>git fetch
+git rebase origin/main
+git push
+
+# 또는
+git pull --rebase
+git push</pre></div>
+
+            <h3>잠겨버린 main branch</h3>
+            <p>
+              실제 협업에서는 main branch에 직접 push하지 못하도록 막아두는 경우가 많다. 이때는 feature branch를 만들어 작업한 뒤 pull request를 통해 병합한다.
+            </p>
+            <div class="code-block"><pre>git checkout -b feature
+# 작업 후 commit
+# feature branch를 push하고 pull request 생성</pre></div>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">7. &quot;origin&quot; 그 너머로 -- 고급 원격 저장소</div>
+            <h2 id="origin-beyond">&quot;origin&quot; 그 너머로 -- 고급 원격 저장소</h2>
+            <p>
+              마지막 단계에서는 원격 저장소를 더 세밀하게 다루는 방법을 배웠다. push, fetch, pull에 인자를 직접 주면 원하는 branch나 commit을 선택해서 주고받을 수 있다.
+            </p>
+
+            <h3>pull --rebase</h3>
+            <p>
+              <code>git pull --rebase</code>는 원격 변경 사항을 가져온 뒤, 내 로컬 commit을 그 위에 다시 쌓는 방식이다. 즉 <code>fetch</code> 후 <code>merge</code>가 아니라 <code>fetch</code> 후 <code>rebase</code>를 수행한다.
+            </p>
+            <div class="code-block"><pre>git pull --rebase
+git push</pre></div>
+
+            <h3>원격 작업과 merge하기</h3>
+            <p>
+              원격 저장소의 내용을 가져온 뒤 여러 branch를 merge로 합칠 수도 있다. 이 방식은 branch가 합쳐진 기록을 명확하게 남긴다.
+            </p>
+            <div class="code-block"><pre>git checkout main
+git pull
+git merge side1
+git merge side2
+git merge side3
+git push</pre></div>
+
+            <h3>원격 저장소 추적하기</h3>
+            <p>
+              로컬 branch가 어떤 원격 branch를 따라갈지 정하는 것을 upstream 설정이라고 한다.
+            </p>
+            <div class="code-block"><pre>git checkout -b foo origin/main
+git branch -u origin/main foo</pre></div>
+
+            <h3>push의 인자</h3>
+            <p>
+              <code>git push</code>는 <code>&lt;source&gt;:&lt;destination&gt;</code> 형태로 source와 destination을 직접 지정할 수 있다. source는 로컬에서 보낼 branch나 commit이고, destination은 원격 저장소에서 갱신할 branch이다.
+            </p>
+            <div class="code-block"><pre>git push origin main
+git push origin foo
+git push origin foo:main
+git push origin main:newBranch
+git push origin main^:foo</pre></div>
+
+            <h3>fetch의 인자</h3>
+            <p>
+              <code>git fetch</code>도 특정 branch나 commit만 가져오도록 인자를 줄 수 있다. <code>&lt;source&gt;:&lt;destination&gt;</code> 형태를 사용하면 원격의 특정 위치를 가져와 로컬 branch에 저장할 수 있다.
+            </p>
+            <div class="code-block"><pre>git fetch origin foo
+git fetch origin C3:foo
+git fetch origin C6:main</pre></div>
+
+            <h3>source가 없는 경우</h3>
+            <p>
+              source 부분을 비우면 특수한 동작을 한다. <code>git push origin :foo</code>는 원격 저장소의 <code>foo</code> branch를 삭제한다. <code>git fetch origin :bar</code>는 Learn Git Branching 학습 환경에서는 비어 있는 source를 이용해 로컬 <code>bar</code> branch를 만드는 예시로 사용된다.
+            </p>
+            <div class="code-block"><pre>git push origin :foo
+git fetch origin :bar</pre></div>
+
+            <h3>pull의 인자</h3>
+            <p>
+              <code>git pull</code>도 fetch와 merge가 합쳐진 명령어이기 때문에 인자를 줄 수 있다. <code>git pull origin foo</code>는 원격의 <code>foo</code>를 가져온 뒤 현재 branch에 병합하는 흐름이고, <code>git pull origin bar:bugFix</code>는 원격 <code>bar</code>를 로컬 <code>bugFix</code>로 가져온 뒤 <code>bugFix</code>를 현재 branch에 병합하는 흐름이다.
+            </p>
+            <div class="code-block"><pre>git pull origin foo
+# git fetch origin foo + git merge FETCH_HEAD
+
+git pull origin bar:bugFix
+# git fetch origin bar:bugFix + git merge bugFix
+
+git pull origin main
+git pull origin main:foo</pre></div>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">Practice Screenshots</div>
+            <h2 id="screenshots">실습 화면</h2>
+            <p>
+              학습 완료 이미지
+            </p>
+            <div class="image-grid">
+              <div class="image-placeholder">
+                <img src="/images/git1.jpg" alt="Git 스크린샷1" />
+              </div>
+              <div class="image-placeholder">
+                <img src="/images/git2.jpg" alt="Git 스크린샷2" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+          <h2 id="retrospect">마무리</h2>
+          <p>
+            Git은 처음엔 명령어가 많고 복잡해 보여 막막했지만, commit 그래프와 branch의 흐름을 이해하고 나니 각 명령어가 왜 필요한지 자연스럽게 연결되기 시작했다. 단순히 명령어를 외우는 것이 아니라 Git이 어떻게 동작하는지를 직접 눈으로 확인하며 익힌 점이 가장 큰 수확이었다.
+          </p>
+          <p>
+            앞으로 프로젝트나 협업 과정에서 Git을 사용할 때도 무작정 명령어를 입력하기보다, 현재 어떤 위치에 있고 어떤 변화가 일어날지 생각하면서 활용하는 습관을 들이고 싶다.
+          </p>
+
+          <div class="note-box">
+            다음 목표 → 실제 프로젝트에서 Git으로 협업해보기 🚀
+          </div>
+          </div>
+      </article>
+
+      <aside class="glow-card post-aside">
+        <div class="card-content">
+          <h3>On this page</h3>
+          <nav class="toc-list">
+            <a href="#overview">개요</a>
+            <a href="#objective">학습 Objective</a>
+            <a href="#git-basic">1. Git 기본</a>
+            <a href="#next-step">2. 다음 단계로</a>
+            <a href="#move-code">3. 코드 이리저리 옮기기</a>
+            <a href="#mixed-set">4. 종합선물세트</a>
+            <a href="#advanced-problems">5. 고급 문제</a>
+            <a href="#push-pull">6. Push & Pull</a>
+            <a href="#origin-beyond">7. origin 그 너머로</a>
+            <a href="#screenshots">실습 화면</a>
+            <a href="#retrospect">마무리</a>
+          </nav>
+        </div>
+      </aside>
+    </section>
+
+    <section class="bottom-nav">
+      <a href="/posts/post3.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">Previous post</span>
+          <span class="nav-title">[CTF] Hacktheon 예선 참가</span>
+        </div>
+      </a>
+      <a href="/posts.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">All posts</span>
+          <span class="nav-title">전체 글 목록으로 돌아가기</span>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/soeun4159">github</a>
+        <a href="mailto:soeun4159@email.com">email</a>
+        <a href="https://discord.com/users/soeun_4159">discord</a>
+        <a href="https://instagram.com/nueosse">instagram</a>
+      </div>
+      <p>© 2026 Soeun Security Blog. Built with GitHub Pages.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.glow-card, .topic-box, .section-card').forEach((card) => {
+      card.addEventListener('mousemove', (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        card.style.setProperty('--x', `${x}px`);
+        card.style.setProperty('--y', `${y}px`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--x', '50%');
+        card.style.setProperty('--y', '50%');
+      });
+    });
+
+    document.querySelectorAll('.toc-list a[href^="#"]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const targetId = link.getAttribute('href').slice(1);
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        const headerOffset = 170;
+        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
