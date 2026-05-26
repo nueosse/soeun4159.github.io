@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unsafe LLM-Based Search Review | 소은 Security Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom, #0b1220, #0f2f2a);
+      color: #ffffff;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    .container {
+      width: min(1120px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #000000;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(18px);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .brand, .site-nav { font-family: "JetBrains Mono", monospace; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .brand span { margin-left: 6px; }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.82);
+      white-space: nowrap;
+    }
+
+    .site-nav a, .footer-links a {
+      transition: color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .site-nav a:hover, .footer-links a:hover, .site-nav a.active {
+      color: #2ee6c2;
+    }
+
+    .search-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      color: rgba(255,255,255,0.92);
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .search-btn svg { width: 22px; height: 22px; display: block; }
+
+    .main {
+      padding: 12px 0 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-label {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: #2ee6c2;
+    }
+
+    .section-title {
+      margin: 8px 0 0;
+      font-size: 34px;
+      line-height: 1.3;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .glow-card, .topic-box, .section-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -1px 0 rgba(255,255,255,0.04);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      --x: 50%;
+      --y: 50%;
+    }
+
+    .glow-card::after, .topic-box::after, .section-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      background: linear-gradient(120deg, rgba(255,255,255,0.15), transparent 40%, transparent 60%, rgba(255,255,255,0.08));
+      opacity: 0.6;
+    }
+
+    .glow-card::before, .topic-box::before, .section-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(180px circle at var(--x) var(--y), rgba(46,230,194,0.2), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.16s ease;
+      pointer-events: none;
+    }
+
+    .glow-card:hover, .topic-box:hover, .section-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(46,230,194,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+
+    .glow-card:hover::before, .topic-box:hover::before, .section-card:hover::before { opacity: 1; }
+
+    .card-content { position: relative; z-index: 1; }
+
+    .post-hero { padding: 32px 28px 28px; }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 8px 0 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(46,230,194,0.14);
+      color: #2ee6c2;
+      border: 1px solid rgba(46,230,194,0.18);
+    }
+
+    .post-date, .post-readtime {
+      font-size: 13px;
+      color: rgba(255,255,255,0.58);
+    }
+
+    .post-summary {
+      margin: 18px 0 0;
+      font-size: 16px;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-cover { padding: 16px; }
+
+    .post-cover img {
+      width: 100%;
+      display: block;
+      border-radius: 18px;
+      object-fit: cover;
+      max-height: 420px;
+    }
+
+    .topic-box, .section-card {
+      margin: 16px 0;
+      padding: 26px 28px;
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .image-placeholder {
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      border: 1px dashed rgba(46,230,194,0.35);
+      background: rgba(0,0,0,0.22);
+      color: rgba(255,255,255,0.56);
+      font-size: 14px;
+      text-align: center;
+      padding: 18px;
+    }
+
+    .image-placeholder img {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+    }
+
+    .topic-title {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(46,230,194,0.12);
+      border: 1px solid rgba(46,230,194,0.18);
+      color: #2ee6c2;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .content-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .post-content { padding: 0; }
+
+    .post-content h2 {
+      margin: 18px 0 12px;
+      font-size: 24px;
+      color: #ffffff;
+    }
+
+    .post-content h3 {
+      margin: 28px 0 12px;
+      font-size: 20px;
+      color: #ffffff;
+    }
+
+    .post-content p, .post-content li {
+      font-size: 15px;
+      line-height: 1.95;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-content ul, .post-content ol {
+      margin: 0 0 12px;
+      padding-left: 20px;
+    }
+
+    .post-content code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.92em;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      color: #d8fff7;
+    }
+
+    .code-block {
+      margin: 14px 0;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.08);
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.84);
+      white-space: pre-wrap;
+    }
+
+    .note-box {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(46,230,194,0.08);
+      border: 1px solid rgba(46,230,194,0.16);
+      color: rgba(255,255,255,0.78);
+      line-height: 1.8;
+    }
+
+    .info-table {
+      width: 100%;
+      margin: 16px 0 20px;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .info-table th,
+    .info-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+      line-height: 1.7;
+      vertical-align: top;
+    }
+
+    .info-table tr:last-child th,
+    .info-table tr:last-child td { border-bottom: 0; }
+
+    .info-table th {
+      width: 120px;
+      color: #2ee6c2;
+      text-align: left;
+      font-weight: 700;
+      background: rgba(46,230,194,0.08);
+      white-space: nowrap;
+    }
+
+    .info-table td { color: rgba(255,255,255,0.78); }
+
+    .info-table a {
+      color: #d8fff7;
+      border-bottom: 1px solid rgba(46,230,194,0.35);
+      word-break: break-all;
+    }
+
+    .soft-list {
+      margin: 16px 0 4px;
+      padding-left: 0;
+      list-style: none;
+      font-family: "Pretendard", system-ui, sans-serif;
+    }
+
+    .soft-list li {
+      position: relative;
+      margin: 8px 0;
+      padding-left: 18px;
+      color: rgba(255,255,255,0.76);
+      line-height: 1.9;
+    }
+
+    .soft-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #2ee6c2;
+      font-weight: 700;
+    }
+
+    .soft-list-title {
+      margin: 18px 0 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2ee6c2;
+    }
+
+    .review-focus-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 20px 0 10px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: rgba(248,214,109,0.1);
+      border: 1px solid rgba(248,214,109,0.22);
+      font-family: "Pretendard", system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+      color: #fff0aa;
+    }
+
+    .review-focus-title::before {
+      content: "✦";
+      color: #f8d66d;
+      font-size: 13px;
+    }
+
+    .future-heading {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 24px 0 10px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: rgba(46,230,194,0.1);
+      border: 1px solid rgba(46,230,194,0.18);
+      font-size: 15px;
+      font-weight: 700;
+      color: #d8fff7;
+    }
+
+    .future-heading::before {
+      content: "✦";
+      color: #2ee6c2;
+      font-size: 13px;
+    }
+
+    .paper-list li {
+      margin: 10px 0;
+    }
+
+    .paper-list code {
+      font-size: 0.9em;
+    }
+
+    .paper-title {
+      display: block;
+      margin-bottom: 4px;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .paper-desc {
+      display: block;
+      color: rgba(255,255,255,0.68);
+      line-height: 1.8;
+    }
+
+    .paper-figure {
+      margin: 18px 0 24px;
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .paper-figure img {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    .paper-figure figcaption {
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.58);
+      text-align: center;
+    }
+
+    .highlight {
+      color: #2ee6c2;
+      font-weight: 700;
+    }
+
+    .danger-highlight {
+      color: #ff9b9b;
+      font-weight: 700;
+    }
+
+    .keyword-highlight {
+      color: #f8d66d;
+      font-weight: 700;
+    }
+
+    .insight-box {
+      margin: 18px 0;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(46,230,194,0.12), rgba(255,255,255,0.04));
+      border: 1px solid rgba(46,230,194,0.22);
+      color: rgba(255,255,255,0.82);
+      line-height: 1.85;
+    }
+
+    .insight-box strong {
+      color: #2ee6c2;
+    }
+
+    .risk-table {
+      width: 100%;
+      margin: 16px 0 22px;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .risk-table th,
+    .risk-table td {
+      padding: 13px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+      line-height: 1.7;
+      vertical-align: top;
+    }
+
+    .risk-table tr:last-child td { border-bottom: 0; }
+
+    .risk-table th {
+      color: #ffffff;
+      text-align: left;
+      background: rgba(255,255,255,0.08);
+      font-weight: 700;
+    }
+
+    .risk-main { color: #ff9b9b; font-weight: 700; }
+    .risk-warning { color: #f8d66d; font-weight: 700; }
+    .risk-source { color: #9fc5ff; font-weight: 700; }
+    .risk-none { color: #9ff0c8; font-weight: 700; }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 22px;
+    }
+
+    .metric-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(46,230,194,0.16);
+    }
+
+    .metric-value {
+      display: block;
+      margin-bottom: 6px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 24px;
+      font-weight: 700;
+      color: #2ee6c2;
+    }
+
+    .metric-label {
+      display: block;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.68);
+    }
+
+    .mini-table {
+      width: 100%;
+      margin: 16px 0 22px;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .mini-table th,
+    .mini-table td {
+      padding: 13px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+      line-height: 1.7;
+      vertical-align: top;
+    }
+
+    .mini-table tr:last-child td { border-bottom: 0; }
+    .mini-table th { color: #2ee6c2; text-align: left; background: rgba(46,230,194,0.08); }
+
+    @media (max-width: 768px) {
+      .metric-grid { grid-template-columns: 1fr; }
+    }
+
+    .post-aside {
+      padding: 20px;
+      position: sticky;
+      top: 96px;
+    }
+
+    .post-aside h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      color: #ffffff;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toc-list a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.68);
+      transition: color .2s ease;
+    }
+
+    .toc-list a:hover { color: #2ee6c2; }
+
+    .bottom-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .nav-card { padding: 18px 20px; }
+
+    .nav-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #2ee6c2;
+    }
+
+    .nav-title {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #ffffff;
+    }
+
+    .site-footer { border-top: 1px solid rgba(255,255,255,0.1); }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      font-size: 14px;
+      color: rgba(255,255,255,0.62);
+    }
+
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+
+    @media (max-width: 1024px) {
+      .content-wrap { grid-template-columns: 1fr; }
+      .post-aside { position: static; }
+    }
+
+    @media (max-width: 768px) {
+      .container { width: min(1120px, calc(100% - 48px)); }
+      .brand { font-size: 15px; white-space: nowrap; }
+      .brand img { width: 20px; height: 20px; }
+      .header-inner { flex-wrap: nowrap; gap: 12px; }
+      .site-nav {
+        width: auto;
+        justify-content: flex-end;
+        gap: 12px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .main { padding: 24px 0 80px; }
+      .post-hero, .post-content, .post-aside, .nav-card { padding: 18px; }
+      .section-title { font-size: 28px; }
+      .bottom-nav { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="brand">
+        <img src="/images/profile.jpg" alt="profile" />
+        <span>soeun4159 | Security Blog</span>
+      </a>
+      <nav class="site-nav">
+        <a href="/index.html">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/posts.html" class="active">Post</a>
+        <button class="search-btn" aria-label="search" onclick="location.href='/posts.html?search=open'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2.2"/>
+            <path d="M16 16L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main container">
+    <section class="glow-card post-hero">
+      <div class="card-content">
+        <p class="section-label">POST</p>
+        <div class="post-meta">
+          <span class="badge">논문/컨퍼런스</span>
+          <span class="post-date">2026.05.26</span>
+        </div>
+        <h1 class="section-title">Unsafe LLM-Based Search: AI Web Search의 안전성 리스크 분석</h1>
+        <p class="post-summary">
+          Zeren Luo et al.의 USENIX Security Symposium 2025 논문 <code>Unsafe LLM-Based Search</code>를 리뷰한다. 이 논문은 ChatGPT Search, Perplexity, Copilot 등 AI 기반 검색 엔진이 악성 URL과 악성 웹 콘텐츠를 어떻게 검색·인용하는지 정량적으로 측정하고, 이를 줄이기 위한 에이전트 기반 방어 시스템을 제안한다.
+        </p>
+      </div>
+    </section>
+
+    <section class="glow-card post-cover">
+      <div class="card-content">
+        <img src="/images/unsafe.jpg" alt="Unsafe LLM-Based Search 논문 리뷰 대표 이미지" />
+      </div>
+    </section>
+
+    <section class="content-wrap">
+      <article class="post-content">
+          <div class="section-card">
+          <h2 id="paper-info">논문 정보</h2>
+          <p>
+            이번에 리뷰한 논문은 <code>Unsafe LLM-Based Search: Quantitative Analysis and Mitigation of Safety Risks in AI Web Search</code>이다. AI 기반 검색 엔진이 <span class="danger-highlight">악성 URL</span>과 <span class="danger-highlight">악성 웹 콘텐츠</span>를 어떻게 검색 결과에 포함하고, LLM 답변 안에서 어떻게 인용하는지를 <span class="highlight">정량적으로 분석</span>한 연구다.
+          </p>
+          <table class="info-table">
+            <tbody>
+              <tr>
+                <th>제목</th>
+                <td>Unsafe LLM-Based Search: Quantitative Analysis and Mitigation of Safety Risks in AI Web Search</td>
+              </tr>
+              <tr>
+                <th>학회</th>
+                <td>34th USENIX Security Symposium</td>
+              </tr>
+              <tr>
+                <th>연도</th>
+                <td>2025</td>
+              </tr>
+              <tr>
+                <th>저자</th>
+                <td>Zeren Luo, Zifan Peng, Yule Liu, Zhen Sun, Mingchen Li, Jingyi Zheng, Xinlei He</td>
+              </tr>
+              <tr>
+                <th>소속</th>
+                <td>The Hong Kong University of Science and Technology (Guangzhou), University of North Texas</td>
+              </tr>
+              <tr>
+                <th>키워드</th>
+                <td>LLM-Based Search, AI-Powered Search Engine, RAG, Malicious URL, Phishing, Agent-based Defense</td>
+              </tr>
+              <tr>
+                <th>논문 링크</th>
+                <td><a href="https://www.usenix.org/conference/usenixsecurity25/presentation/luo-zeren" target="_blank" rel="noopener noreferrer">https://www.usenix.org/conference/usenixsecurity25/presentation/luo-zeren</a></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+
+          <div class="section-card">
+          <h2 id="why-picked">논문을 고른 이유</h2>
+          <p>
+            AI 검색 엔진은 이제 단순한 실험 기능이 아니라 ChatGPT Search, Perplexity, Copilot처럼 일상적인 정보 탐색 도구로 자리 잡고 있다. 사용자는 검색 결과 링크 목록을 직접 비교하기보다 <span class="highlight">LLM이 요약해준 답변과 추천 URL</span>을 더 쉽게 신뢰한다.
+          </p>
+          <div class="insight-box">
+            <strong>선정 포인트</strong> — 이 논문은 “AI 검색이 더 편리해졌다”는 흐름 안에서, LLM이 악성 링크에 신뢰성을 부여할 수 있다는 문제를 실제 상용 AIPSE 기준으로 측정했다는 점이 핵심이다.
+          </div>
+          <p>
+            이 논문은 이런 상황에서 AI 검색 인터페이스가 악성 URL이나 악성 웹 콘텐츠를 그대로 인용할 수 있다는 문제를 처음으로 체계적으로 정량화했다는 점에서 의미가 있다. 앞서 리뷰한 Kim et al.이 LLM 에이전트의 공격 능력에 초점을 맞췄다면, 이 논문은 일반 사용자가 매일 쓰는 AI 검색 인터페이스 자체의 안전성을 측정한다는 점에서 보완적인 시각을 제공한다.
+          </p>
+          <p class="review-focus-title">Review Focus</p>
+          <ul class="soft-list">
+            <li>AIPSE가 악성 URL을 얼마나 자주 인용하는가</li>
+            <li>LLM 답변 본문과 출처 목록에서 위험도가 어떻게 달라지는가</li>
+            <li>전통 검색엔진(TSE)과 비교했을 때 어떤 차이가 있는가</li>
+            <li>사용자 단에서 적용 가능한 방어 시스템은 얼마나 효과적인가</li>
+          </ul>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">1. Problem Definition</div>
+            <h2 id="problem-definition">문제 정의</h2>
+            <p>
+              AI 기반 검색 엔진, 즉 <code>AIPSE</code>는 보통 <code>RAG</code> 구조를 기반으로 한다. 사용자의 질의에 대해 웹에서 관련 페이지를 가져온 뒤, LLM이 그 내용을 요약해 답변을 생성하는 방식이다. 문제는 이 <code>retrieval</code> 과정에서 <span class="danger-highlight">악성 웹사이트가 포함</span>될 수 있고, LLM이 이를 충분히 검증하지 못한 채 답변 본문이나 출처 목록에 인용할 수 있다는 점이다.
+            </p>
+            <p>
+              논문은 2024년 11월 ChatGPT Search를 통해 가짜 Solana API 사이트로 유도된 개발자가 <span class="danger-highlight">약 2,500달러</span>를 잃은 사건을 출발점으로 삼는다. 이 사례는 AI 검색이 단순히 검색 결과를 보여주는 것을 넘어, 잘못된 링크를 신뢰 가능한 답처럼 제시할 때 실제 금전 피해로 이어질 수 있음을 보여준다.
+            </p>
+            <p>
+              기존 전통 검색엔진인 Google이나 Bing은 링크 목록을 보여주기 때문에 사용자가 클릭 전에 URL, 제목, 스니펫을 비교할 여지가 있다. 반면 AIPSE는 LLM이 내용을 요약하고 특정 URL을 정답처럼 제시한다. 이 과정에서 LLM의 권위가 악성 링크에 덧씌워지는 효과가 생긴다.
+            </p>
+            <p>
+              기존 악성 URL 탐지 연구들은 URL 길이, IP 주소 포함 여부, 도메인 패턴, 웹페이지 콘텐츠 같은 요소를 분석하는 방식에 집중해왔다. 하지만 AIPSE 환경에서는 공식 사이트와 악성 사이트가 동시에 응답에 포함되거나, LLM이 악성 사이트를 공식 사이트로 오인하는 상황이 발생한다. 따라서 단순한 URL 탐지 모델만으로는 RAG 파이프라인에서 발생하는 위험을 충분히 설명하기 어렵다.
+            </p>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">2. Core Idea</div>
+            <h2 id="core-idea">핵심 아이디어</h2>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <span class="metric-value">01</span>
+                <span class="metric-label">상용 AIPSE의 악성 URL 인용 위험을 정량 측정</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-value">02</span>
+                <span class="metric-label">AIPSE와 TSE를 비교하고 실제 공격 가능성을 Case Study로 검증</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-value">03</span>
+                <span class="metric-label">Agent-based Defense로 위험 응답을 탐지하고 완화</span>
+              </div>
+            </div>
+            <p>
+              논문의 핵심 아이디어는 세 가지다. 첫째, AIPSE가 악성 콘텐츠를 얼마나 자주, 어떤 방식으로 인용하는지 처음으로 체계적으로 측정한다. 둘째, AIPSE와 전통 검색엔진인 TSE를 비교하고 실제 공격 가능성을 케이스 스터디로 검증한다. 셋째, 측정된 위험을 줄이기 위한 에이전트 기반 방어 시스템을 제안한다.
+            </p>
+            <p>
+              특히 이 논문은 악성 URL이 단순히 검색 결과 어딘가에 존재하는지를 보는 데서 그치지 않는다. 악성 URL이 LLM 답변 본문에 직접 등장하는지, 경고와 함께 등장하는지, 출처 목록에만 숨어 있는지를 구분해 사용자가 실제로 얼마나 위험한 상황에 놓이는지를 평가한다.
+            </p>
+            <p>
+              이 접근은 AIPSE 보안 문제를 단순한 URL 필터링 문제가 아니라, <code>retrieval</code>, <code>generation</code>, <code>citation</code>이 결합된 LLM 기반 검색 파이프라인의 안전성 문제로 바라본다는 점에서 중요하다.
+            </p>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">3. Methodology</div>
+            <h2 id="methodology">방법론 / 시스템 설명</h2>
+            <figure class="paper-figure">
+              <img src="/images/unsafe.jpg" alt="Unsafe LLM-Based Search 전체 연구 흐름도" />
+              <figcaption>Figure 1. Data Collection, Risk Evaluation, Case Study, Agent Defense로 이어지는 논문의 전체 프로세스</figcaption>
+            </figure>
+            <h3>Risk Taxonomy</h3>
+            <p>
+              저자들은 AIPSE 응답에서 URL이 등장하는 위치와 악성 여부에 따라 위험도를 네 가지로 나누었다. 이 분류는 단순히 악성 URL이 있는지 없는지를 보는 것이 아니라, 사용자가 실제로 얼마나 쉽게 피해로 이어질 수 있는지를 반영한다.
+            </p>
+            <table class="risk-table">
+              <thead>
+                <tr>
+                  <th>Risk Type</th>
+                  <th>의미</th>
+                  <th>위험도 해석</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="risk-main">Main Risk</td>
+                  <td>악성 URL이 답변 본문에 직접 인용됨</td>
+                  <td>사용자가 클릭 한 번으로 피해를 입을 수 있어 가장 위험함</td>
+                </tr>
+                <tr>
+                  <td class="risk-warning">Warning Risk</td>
+                  <td>악성 URL이 인용되지만 경고 문구가 함께 제공됨</td>
+                  <td>위험 URL은 노출되지만 사용자가 경고를 인지할 가능성이 있음</td>
+                </tr>
+                <tr>
+                  <td class="risk-source">Source Risk</td>
+                  <td>악성 URL이 출처 목록에만 존재함</td>
+                  <td>직접 답변에는 없지만 사용자가 출처를 열면 위험할 수 있음</td>
+                </tr>
+                <tr>
+                  <td class="risk-none">None</td>
+                  <td>양성 URL</td>
+                  <td>악성으로 분류되지 않은 URL</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>Dataset & Query Design</h3>
+            <p>
+              평가 데이터셋은 PhishTank, ThreatBook, LevelBlue에서 수집한 악성 URL을 기반으로 구성했다. 이 중 인증서가 유효하고 HTTP 상태 코드 200을 반환하는 URL만 남긴 뒤, 수동 검증과 교차 검증을 거쳐 최종 100개를 선정했다.
+            </p>
+            <p>
+              쿼리는 세 가지 유형으로 설계했다. 첫 번째는 5개 키워드를 나열하는 키워드 목록 쿼리, 두 번째는 일상적인 문장 형태의 자연어 쿼리, 세 번째는 AIPSE에 URL을 직접 입력하는 URL 직접 쿼리다. 또한 쿼리의 현실성을 검증하기 위해 120명을 대상으로 설문도 진행했다.
+            </p>
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>Query Type</th>
+                  <th>설명</th>
+                  <th>의미</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="keyword-highlight">Keyword List Query</span></td>
+                  <td>5개 키워드를 나열해 검색</td>
+                  <td>일반 검색어 기반 위험 노출을 측정</td>
+                </tr>
+                <tr>
+                  <td><span class="highlight">Natural Language Query</span></td>
+                  <td>일상적인 문장 형태로 검색</td>
+                  <td>실제 AI 검색 사용 습관과 가까운 질의</td>
+                </tr>
+                <tr>
+                  <td><span class="danger-highlight">Direct URL Query</span></td>
+                  <td>URL을 직접 AIPSE에 입력</td>
+                  <td>LLM이 URL 내용을 더 신뢰하거나 자세히 설명하는지 확인</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>Evaluation Targets</h3>
+            <p>
+              평가 대상은 ChatGPT Search, Perplexity Pro, Copilot, TextCortex, Grok, Doubao, Kimi까지 총 7개 상용 AIPSE다. 전통 검색엔진인 Google과 Bing도 비교 대상으로 포함해 AIPSE와 TSE의 유틸리티 및 안전성을 함께 분석했다.
+            </p>
+            <div class="insight-box">
+              <strong>평가 범위</strong> — 논문은 단일 모델 실험이 아니라 실제 서비스 중인 7개 AIPSE와 Google, Bing을 비교했다. 그래서 결과가 실사용 환경과 더 가깝다.
+            </div>
+
+            <h3>Case Study</h3>
+            <p>
+              논문은 두 가지 케이스 스터디로 현실성을 보강한다. 첫 번째는 가짜 Web3 API 문서 사이트를 만들어 Perplexity가 악성 코드를 그대로 인용하도록 유도한 사례다. 특히 Perplexity 플랫폼에서 ChatGPT-o1, ChatGPT-4o mini, Grok-2, Sonar Large, Sonar Huge, Claude 3.5 Sonnet, Perplexity Pro Search, Claude 3.5 Haiku까지 8개 foundation model을 테스트했고, 모든 모델이 가짜 문서 사이트의 악성 코드를 안전 경고 없이 인용했다. 두 번째는 가짜 “공식” 사이트를 만들어 AIPSE가 피싱 사이트를 진짜로, 실제 공식 사이트를 가짜로 판단하도록 유도한 사례다.
+            </p>
+
+            <h3>Defense System</h3>
+            <p>
+              방어 시스템은 <code>ReAct</code> 패턴 기반 에이전트로 구현된다. 콘텐츠 정제 도구와 URL 탐지기를 조합해 AIPSE 응답을 후처리하는 방식이며, 탐지기로는 <code>XGBoost</code>, <code>PhishLLM</code>, <code>HtmlLLM</code> 세 가지 선택지를 비교한다.
+            </p>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">4. Evaluation</div>
+            <h2 id="evaluation">평가 및 결과 해석</h2>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <span class="metric-value danger-highlight">41</span>
+                <span class="metric-label">Grok의 Keyword Query 기준 Main Risk 응답 수</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-value">13.2%</span>
+                <span class="metric-label">ChatGPT Search의 악성 URL 본문 직접 인용 비율</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-value">78.3%</span>
+                <span class="metric-label">HtmlLLM-Detector 기반 agent defense 성공률</span>
+              </div>
+            </div>
+            <p>
+              키워드 쿼리 결과에서 Grok, TextCortex, Kimi는 100개 쿼리 중 각각 <span class="danger-highlight">41건</span>, <span class="danger-highlight">34건</span>, <span class="danger-highlight">32건</span>에서 <code>Main Risk</code> 응답을 생성했다. 전체적으로 Copilot을 제외한 모든 AIPSE에서 39% 이상의 응답이 어떤 형태로든 위험을 포함했다. 다만 Copilot은 Sources를 제공하지 않아 Source Risk가 집계되지 않았기 때문에, 다른 AIPSE와 완전히 동일한 조건으로 비교하기는 어렵다.
+            </p>
+            <p>
+              반면 ChatGPT Search는 악성 URL을 비교적 많이 색인했음에도 답변 본문에 직접 인용하는 비율은 <span class="highlight">13.2%</span>로 가장 낮았다. 이는 retrieval 단계에서 위험 URL을 완전히 배제하지 못하더라도, generation 단계에서 안전 필터링이 어느 정도 작동할 수 있음을 보여준다. 반대로 Perplexity Pro는 Main 또는 Warning Risk URL 비율이 <span class="danger-highlight">70.7%</span>로 가장 높아, 검색된 악성 URL을 답변에 직접 활용하는 경향이 강했다. Doubao는 Main 또는 Warning Risk URL 비율이 <span class="keyword-highlight">67.6%</span>였고, 그중 Warning Risk 비율이 <span class="keyword-highlight">53.2%</span>로 높아 위험 URL을 인용하면서도 경고를 함께 제공하는 특징을 보였다.
+            </p>
+
+            <h3>Natural Language Query</h3>
+            <p>
+              자연어 쿼리는 키워드 쿼리보다 전반적으로 안전한 결과를 보였다. 하지만 중국어 기반 AIPSE인 Doubao와 Kimi는 오히려 <code>Main Risk</code>가 증가했다. 논문은 Doubao와 Kimi가 <code>gambling</code>, <code>pornography</code> 같은 명시적 키워드에는 응답을 거부했지만, <code>Where can I find reliable information about ...</code>처럼 자연어 문장으로 감싼 경우에는 정상 응답하는 사례를 관찰했다. 저자들은 영어 자연어 표현이 중국어 기반 AIPSE의 안전 필터를 약화시키거나 우회했을 가능성을 제시한다.
+            </p>
+
+            <h3>Direct URL Query</h3>
+            <p>
+              URL 직접 쿼리는 가장 위험한 유형이었다. <code>Source Risk</code>에 머물던 URL도 사용자가 직접 입력하면 <code>Main Risk</code>로 상승하는 경우가 많았다. 특히 Grok에서는 <span class="danger-highlight">Source Risk URL 49개 중 48개</span>가 직접 URL Query 이후 Main Risk 또는 Warning Risk로 상승했다.
+            </p>
+            <p>
+              이는 LLM이 명시적으로 주어진 URL에 대해 더 충실하게 설명하려는 경향과 관련이 있어 보인다. 사용자가 직접 URL을 제시하면 모델은 해당 URL을 검증 대상이라기보다 답변의 중심 정보로 취급할 수 있다.
+            </p>
+
+            <h3>AIPSE vs TSE</h3>
+            <p>
+              전통 검색엔진과의 비교도 흥미롭다. 전통 검색엔진 비교에서는 Google이 16건, Bing이 18건의 risk-return query를 보였고, safe search mode를 켠 Google (safe)과 Bing (safe)도 각각 14건에서 악성 URL을 반환했다. 논문 기준으로는 대부분의 AIPSE보다 전통 검색엔진이 더 취약한 결과를 보였다.
+            </p>
+            <p>
+              동시에 유틸리티 측면에서도 AIPSE가 <code>Needs Met Rating</code> 기준으로 TSE를 크게 앞섰다. 즉, 현시점에서는 AIPSE가 TSE보다 더 유용하면서도 더 안전하다는 반직관적인 결론이 나온다. 다만 AIPSE가 악성 URL을 인용할 때는 LLM의 권위가 함께 실리기 때문에, 단순 비교만으로 안심할 수는 없다.
+            </p>
+
+            <h3>Defense Performance</h3>
+            <p>
+              방어 시스템에서는 <code>HtmlLLM-Detector</code>가 <span class="highlight">F1 Score 0.822</span>로 가장 우수했고, 에이전트 방어 성공률도 <span class="highlight">78.3%</span>를 기록했다. <code>XGBoost</code>는 Recall 1.0을 달성했지만 Precision이 0.5에 그쳐 정상 정보까지 과하게 제거하는 문제가 있었다.
+            </p>
+            <p>
+              <code>PhishLLM</code>은 phishing 탐지에는 강점이 있지만 malware, scam 등 비피싱 악성 URL에 취약해 전체 성능이 낮았다. 이 결과는 AIPSE 보안에서 단순 phishing 탐지만으로는 부족하다는 점을 보여준다.
+            </p>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">5. Limitations</div>
+            <h2 id="limitations">한계점</h2>
+            <p>
+              이 논문은 실제 서비스 중인 AIPSE를 대상으로 위험을 측정했다는 점에서 의미가 크지만, 실험을 해석할 때 몇 가지 한계도 함께 봐야 한다. 가장 먼저 데이터셋 규모가 크지 않다. 최종 평가에 사용된 URL은 100개였기 때문에, 모든 종류의 악성 URL이나 장기간 변화하는 검색 결과를 완전히 대표한다고 보기는 어렵다.
+            </p>
+            <p>
+              또 AIPSE 대부분이 연구용 API를 제공하지 않기 때문에, 응답 수집과 위험 분류 과정에서 수동 평가가 포함될 수밖에 없었다. 이 때문에 실험 자동화가 어렵고, 평가자 판단이 일부 개입될 가능성도 남아 있다. 특히 Copilot처럼 Sources를 제공하지 않는 플랫폼은 Source Risk를 다른 AIPSE와 같은 기준으로 비교하기 어렵다.
+            </p>
+            <p>
+              마지막으로 방어 시스템은 서비스 내부에 직접 들어가는 방식이 아니라 사용자 단에서 응답을 후처리하는 형태다. 따라서 실제 서비스 제공자가 비슷한 방식을 적용하지 않는다면, 개별 사용자가 직접 도구를 구축해야 한다는 현실적인 부담이 있다.
+            </p>
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>한계</th>
+                  <th>내용</th>
+                  <th>영향</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>데이터셋 규모</td>
+                  <td>최종 평가 URL이 100개로 제한됨</td>
+                  <td>다양한 악성 URL 유형과 장기 변화까지 포괄하기 어려움</td>
+                </tr>
+                <tr>
+                  <td>실험 기간</td>
+                  <td>피싱 사이트의 짧은 생명주기 때문에 5일 안에 실험 수행</td>
+                  <td>재현성에 제약이 생길 수 있음</td>
+                </tr>
+                <tr>
+                  <td>수동 평가</td>
+                  <td>AIPSE API 부재로 평가 상당 부분을 수동 진행</td>
+                  <td>자동화가 어렵고 평가자 편향 가능성이 남음</td>
+                </tr>
+                <tr>
+                  <td>일반화</td>
+                  <td>케이스 스터디가 Perplexity 중심으로 진행됨</td>
+                  <td>모든 AIPSE에 동일하게 일반화하기에는 한계가 있음</td>
+                </tr>
+                <tr>
+                  <td>플랫폼별 출력 차이</td>
+                  <td>Copilot은 Sources를 제공하지 않음</td>
+                  <td>Source Risk 기준에서 다른 AIPSE와 완전히 동일한 조건으로 비교하기 어려움</td>
+                </tr>
+                <tr>
+                  <td>방어 적용 위치</td>
+                  <td>사용자 단 후처리 방식</td>
+                  <td>서비스 제공자가 채택하지 않으면 개별 사용자가 직접 구축해야 함</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">Future Work</div>
+            <h2 id="future-work">앞으로 해볼 것</h2>
+            <p>
+              이 논문을 읽고 바로 대규모 AIPSE 평가를 재현하기보다는, 내가 지금 할 수 있는 범위에서 작게 실험해보는 방향이 현실적이라고 생각했다. 특히 URL 탐지, RAG 구조, 간단한 LLM 프롬프트 실험을 연결하면 웹 보안과 AI 보안을 함께 공부하는 데 도움이 될 것 같다.
+            </p>
+
+            <div class="insight-box">
+              <strong>내 수준에서의 목표</strong> — 논문 전체를 그대로 재현하기보다, 악성 URL 탐지와 AI 검색 응답 검증 과정을 작은 실습 단위로 나누어 이해하는 것을 목표로 한다.
+            </div>
+
+            <h3 class="future-heading">더 읽어볼 논문</h3>
+            <ul class="soft-list paper-list">
+              <li>
+                <span class="paper-title">Nestaas et al., <code>Adversarial Search Engine Optimization for Large Language Models</code></span>
+                <span class="paper-desc">이 논문이 직접 인용하는 선행 연구로, SEO 기반으로 AIPSE의 검색 결과와 인용 대상을 조작하는 공격을 다룬다.</span>
+              </li>
+              <li>
+                <span class="paper-title">Liu et al., <code>PhishLLM: Less Defined Knowledge and More True Alarms</code></span>
+                <span class="paper-desc">USENIX Security 2024 논문으로, 본 논문에서 방어 도구로 사용된 PhishLLM의 원 논문이다.</span>
+              </li>
+              <li>
+                <span class="paper-title">Greshake et al., <code>Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection</code></span>
+                <span class="paper-desc">RAG 시스템과 LLM-integrated application에서 발생할 수 있는 indirect prompt injection 취약성을 다룬다.</span>
+              </li>
+            </ul>
+
+            <h3 class="future-heading">직접 해보고 싶은 것</h3>
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>단계</th>
+                  <th>해볼 것</th>
+                  <th>목표</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1단계</td>
+                  <td>PhishTank 같은 공개 데이터에서 URL 몇 개를 가져와 특징을 정리하기</td>
+                  <td>악성 URL이 어떤 패턴을 가지는지 감 잡기</td>
+                </tr>
+                <tr>
+                  <td>2단계</td>
+                  <td>URL 길이, 도메인, HTTPS 여부, 의심 키워드 같은 간단한 feature를 뽑아보기</td>
+                  <td>URL-based detection의 기본 구조 이해하기</td>
+                </tr>
+                <tr>
+                  <td>3단계</td>
+                  <td>간단한 Python 스크립트로 URL 위험도를 점수화해보기</td>
+                  <td>논문의 detector 개념을 작은 버전으로 구현해보기</td>
+                </tr>
+                <tr>
+                  <td>4단계</td>
+                  <td>정상 사이트와 의심 사이트의 HTML 제목, meta 태그, 본문 일부를 비교해보기</td>
+                  <td>HtmlLLM-Detector가 왜 HTML 내용을 보는지 이해하기</td>
+                </tr>
+                <tr>
+                  <td>5단계</td>
+                  <td>한국어 검색어 몇 개로 AI 검색 결과의 출처를 직접 관찰하고 기록하기</td>
+                  <td>한국어 환경에서도 비슷한 위험이 나타나는지 확인하기</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p>
+              장기적으로는 이 논문의 방어 시스템을 완전히 구현하기보다, 먼저 <code>HtmlLLM-Detector</code>의 아이디어를 단순화해서 따라 해보고 싶다. 예를 들어 URL만 보는 방식과 HTML 내용까지 함께 보는 방식을 비교하면, 왜 단순 URL 탐지만으로는 부족한지 더 잘 이해할 수 있을 것 같다.
+            </p>
+
+            <h3 class="future-heading">연구/프로젝트로 발전시킨다면</h3>
+            <p>
+              이후에는 작은 프로젝트로 확장해, 사용자가 입력한 URL에 대해 “공식 사이트처럼 보이는지”, “피싱 의심 요소가 있는지”, “AI 검색 답변에 그대로 인용해도 안전한지”를 간단히 점검하는 웹 페이지를 만들어볼 수 있다.
+            </p>
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>프로젝트 방향</th>
+                  <th>구현 아이디어</th>
+                  <th>기대 효과</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>URL 안전 점검 도구</td>
+                  <td>사용자가 URL을 입력하면 도메인, HTTPS 여부, 의심 키워드, URL 길이를 기반으로 간단한 위험 점수를 계산한다.</td>
+                  <td>URL-based detection의 기본 원리를 직접 구현해볼 수 있다.</td>
+                </tr>
+                <tr>
+                  <td>HTML 기반 피싱 의심 분석</td>
+                  <td>페이지의 title, meta, h1 태그를 가져와 공식 사이트를 사칭하는 표현이 있는지 확인한다.</td>
+                  <td>HtmlLLM-Detector가 왜 HTML 내용을 함께 보는지 이해할 수 있다.</td>
+                </tr>
+                <tr>
+                  <td>AI 검색 출처 검증 기록</td>
+                  <td>한국어 검색어로 AI 검색을 사용해보고, 답변 본문과 출처에 어떤 URL이 등장하는지 기록한다.</td>
+                  <td>논문의 아이디어를 한국어 환경에서 작게 확장해볼 수 있다.</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              처음부터 논문 수준의 시스템을 목표로 하기보다는, URL 분석과 HTML 분석을 연결하는 미니 보안 도구를 만드는 방향이 내 현재 학습 단계에 가장 잘 맞는 것 같다.
+            </p>
+          </div>
+
+          <div class="topic-box">
+            <div class="topic-title">Takeaways</div>
+            <h2 id="takeaways">느낀 점</h2>
+            <p>
+              이 논문에서 가장 흥미로웠던 부분은 <span class="keyword-highlight">“AIPSE가 TSE보다 안전해 보인다”</span>는 결과였다. 처음에는 AI 검색이 웹페이지 내용을 자동으로 가져와서 답변을 만들기 때문에, 오히려 더 위험할 것이라고 생각했다. 그런데 실험 결과만 보면 Google이나 Bing 같은 전통 검색엔진보다 AIPSE가 악성 URL을 덜 노출하는 경우도 있었다.
+            </p>
+            <p>
+              하지만 이것을 “AI 검색은 안전하다”는 의미로 받아들이면 안 된다고 느꼈다. 전통 검색엔진은 여러 링크를 목록으로 보여주기 때문에 사용자가 URL이나 제목을 보고 한 번 더 의심할 수 있다. 반면 AIPSE는 LLM이 답변을 정리해주고, 그 안에 출처 링크를 자연스럽게 붙여준다. 그래서 같은 악성 URL이라도 AI 답변 안에 들어가면 사용자가 더 쉽게 믿을 수 있다.
+            </p>
+            <p>
+              특히 LLM이 악성 URL을 단순히 보여주는 것이 아니라, 설명까지 붙여서 “이 링크가 도움이 된다”는 느낌으로 제시할 수 있다는 점이 위험하다고 생각했다. 사용자는 LLM의 답변을 검색 결과보다 더 정돈된 정보로 받아들이기 때문에, 악성 링크가 답변 본문에 들어가는 순간 신뢰도가 같이 올라가는 문제가 생긴다.
+            </p>
+            <p>
+              케이스 스터디도 기억에 남았다. 피싱 사이트에 “이 사이트가 공식 사이트이고, 진짜 공식 사이트는 가짜다”라는 식의 문구를 넣었을 뿐인데 AIPSE가 그 내용을 믿고 잘못된 판단을 했다. 결국 LLM 기반 검색은 웹페이지 내용을 가져오는 능력은 좋아졌지만, 그 내용이 진짜인지 비판적으로 검증하는 능력은 아직 부족하다는 생각이 들었다.
+            </p>
+            <p>
+              그래서 이 논문은 AI 검색을 사용할 때도 출처를 무조건 믿기보다, URL과 사이트 정보를 직접 확인하는 습관이 필요하다는 점을 보여준다. 편리함이 커진 만큼, 잘못된 정보나 악성 링크가 더 그럴듯하게 포장될 수 있다는 점을 조심해야 한다고 느꼈다.
+            </p>
+          </div>
+      </article>
+
+      <aside class="glow-card post-aside">
+        <div class="card-content">
+          <h3>On this page</h3>
+          <nav class="toc-list">
+            <a href="#paper-info">논문 정보</a>
+            <a href="#why-picked">논문을 고른 이유</a>
+            <a href="#problem-definition">1. 문제 정의</a>
+            <a href="#core-idea">2. 핵심 아이디어</a>
+            <a href="#methodology">3. 방법론 / 시스템 설명</a>
+            <a href="#evaluation">4. 평가 및 결과 해석</a>
+            <a href="#limitations">5. 한계점</a>
+            <a href="#takeaways">느낀 점</a>
+            <a href="#future-work">앞으로 해볼 것</a>
+          </nav>
+        </div>
+      </aside>
+    </section>
+
+    <section class="bottom-nav">
+      <a href="/posts/post5.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">Previous post</span>
+          <span class="nav-title">Git 배우기: 커밋부터 브랜치, 리베이스까지</span>
+        </div>
+      </a>
+      <a href="/posts.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">All posts</span>
+          <span class="nav-title">전체 글 목록으로 돌아가기</span>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/soeun4159">github</a>
+        <a href="mailto:soeun4159@email.com">email</a>
+        <a href="https://discord.com/users/soeun_4159">discord</a>
+        <a href="https://instagram.com/nueosse">instagram</a>
+      </div>
+      <p>© 2026 Soeun Security Blog. Built with GitHub Pages.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.glow-card, .topic-box, .section-card').forEach((card) => {
+      card.addEventListener('mousemove', (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        card.style.setProperty('--x', `${x}px`);
+        card.style.setProperty('--y', `${y}px`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--x', '50%');
+        card.style.setProperty('--y', '50%');
+      });
+    });
+
+    document.querySelectorAll('.toc-list a[href^="#"]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const targetId = link.getAttribute('href').slice(1);
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        const headerOffset = 170;
+        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
