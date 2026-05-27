@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>침입 탐지 및 방지 시스템(IDS/IPS) | 소은 Security Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom, #0b1220, #0f2f2a);
+      color: #ffffff;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    .container {
+      width: min(1120px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #000000;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(18px);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .brand, .site-nav { font-family: "JetBrains Mono", monospace; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .brand span { margin-left: 6px; }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.82);
+      white-space: nowrap;
+    }
+
+    .site-nav a, .footer-links a {
+      transition: color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .site-nav a:hover, .footer-links a:hover, .site-nav a.active {
+      color: #2ee6c2;
+    }
+
+    .search-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      color: rgba(255,255,255,0.92);
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .search-btn svg { width: 22px; height: 22px; display: block; }
+
+    .main {
+      padding: 12px 0 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-label {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: #2ee6c2;
+    }
+
+    .section-title {
+      margin: 8px 0 0;
+      font-size: 34px;
+      line-height: 1.3;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .glow-card, .topic-box, .section-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -1px 0 rgba(255,255,255,0.04);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      --x: 50%;
+      --y: 50%;
+    }
+
+    .glow-card::after, .topic-box::after, .section-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      background: linear-gradient(120deg, rgba(255,255,255,0.15), transparent 40%, transparent 60%, rgba(255,255,255,0.08));
+      opacity: 0.6;
+    }
+
+    .glow-card::before, .topic-box::before, .section-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(180px circle at var(--x) var(--y), rgba(46,230,194,0.2), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.16s ease;
+      pointer-events: none;
+    }
+
+    .glow-card:hover, .topic-box:hover, .section-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(46,230,194,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+
+    .glow-card:hover::before, .topic-box:hover::before, .section-card:hover::before { opacity: 1; }
+
+    .card-content { position: relative; z-index: 1; }
+
+    .post-hero { padding: 32px 28px 28px; }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 8px 0 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(46,230,194,0.14);
+      color: #2ee6c2;
+      border: 1px solid rgba(46,230,194,0.18);
+    }
+
+    .post-date, .post-readtime {
+      font-size: 13px;
+      color: rgba(255,255,255,0.58);
+    }
+
+    .post-summary {
+      margin: 18px 0 0;
+      font-size: 16px;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-cover { padding: 16px; }
+
+    .post-cover img {
+      width: 100%;
+      display: block;
+      border-radius: 18px;
+      object-fit: cover;
+      max-height: 420px;
+    }
+
+    .topic-box, .section-card {
+      margin: 16px 0;
+      padding: 26px 28px;
+    }
+
+    .topic-title {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(46,230,194,0.12);
+      border: 1px solid rgba(46,230,194,0.18);
+      color: #2ee6c2;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .content-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .post-content { padding: 0; }
+
+    .post-content h2 {
+      margin: 18px 0 12px;
+      font-size: 24px;
+      color: #ffffff;
+    }
+
+    .post-content h3 {
+      margin: 28px 0 12px;
+      font-size: 20px;
+      color: #ffffff;
+    }
+
+    .post-content p, .post-content li {
+      font-size: 15px;
+      line-height: 1.95;
+      color: rgba(255,255,255,0.74);
+    }
+
+    .post-content ul, .post-content ol {
+      margin: 0 0 12px;
+      padding-left: 20px;
+    }
+
+    .post-content code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.92em;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      color: #d8fff7;
+    }
+
+    .note-box {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(46,230,194,0.08);
+      border: 1px solid rgba(46,230,194,0.16);
+      color: rgba(255,255,255,0.78);
+      line-height: 1.8;
+    }
+
+    .info-table, .mini-table {
+      width: 100%;
+      margin: 16px 0 20px;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .info-table th,
+    .info-table td,
+    .mini-table th,
+    .mini-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+      line-height: 1.7;
+      vertical-align: top;
+    }
+
+    .info-table tr:last-child th,
+    .info-table tr:last-child td,
+    .mini-table tr:last-child td { border-bottom: 0; }
+
+    .info-table th,
+    .mini-table th {
+      color: #2ee6c2;
+      text-align: left;
+      font-weight: 700;
+      background: rgba(46,230,194,0.08);
+      white-space: nowrap;
+    }
+
+    .info-table th { width: 120px; }
+    .info-table td, .mini-table td { color: rgba(255,255,255,0.78); }
+
+    .summary-compare-table th:first-child,
+    .summary-compare-table td:first-child {
+      width: 22%;
+    }
+
+    .summary-compare-table th:nth-child(2),
+    .summary-compare-table td:nth-child(2),
+    .summary-compare-table th:nth-child(3),
+    .summary-compare-table td:nth-child(3) {
+      width: 39%;
+    }
+
+    .tools-table th:first-child,
+    .tools-table td:first-child {
+      width: 18%;
+    }
+
+    .tools-table th:nth-child(2),
+    .tools-table td:nth-child(2) {
+      width: 42%;
+    }
+
+    .tools-table th:nth-child(3),
+    .tools-table td:nth-child(3) {
+      width: 40%;
+    }
+
+    .soft-list {
+      margin: 16px 0 4px;
+      padding-left: 0;
+      list-style: none;
+      font-family: "Pretendard", system-ui, sans-serif;
+    }
+
+    .soft-list li {
+      position: relative;
+      margin: 8px 0;
+      padding-left: 18px;
+      color: rgba(255,255,255,0.76);
+      line-height: 1.9;
+    }
+
+    .soft-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #2ee6c2;
+      font-weight: 700;
+    }
+
+    .highlight {
+      color: #2ee6c2;
+      font-weight: 700;
+    }
+
+    .danger-highlight {
+      color: #ff9b9b;
+      font-weight: 700;
+    }
+
+    .keyword-highlight {
+      color: #f8d66d;
+      font-weight: 700;
+    }
+
+    .insight-box {
+      margin: 18px 0;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(46,230,194,0.12), rgba(255,255,255,0.04));
+      border: 1px solid rgba(46,230,194,0.22);
+      color: rgba(255,255,255,0.82);
+      line-height: 1.85;
+    }
+
+    .insight-box strong { color: #2ee6c2; }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 22px;
+    }
+
+    .intro-metric-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .metric-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(46,230,194,0.16);
+    }
+
+    .metric-value {
+      display: block;
+      margin-bottom: 6px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 24px;
+      font-weight: 700;
+      color: #2ee6c2;
+    }
+
+    .metric-label {
+      display: block;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.68);
+    }
+
+    .compare-grid, .type-grid, .pros-cons-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0 22px;
+    }
+
+    .system-pros-cons {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin: 18px 0 22px;
+    }
+
+    .system-row {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .system-row.ids-row {
+      border-color: rgba(46,230,194,0.25);
+      background: linear-gradient(180deg, rgba(46,230,194,0.08), rgba(0,0,0,0.18));
+    }
+
+    .system-row.ips-row {
+      border-color: rgba(248,214,109,0.25);
+      background: linear-gradient(180deg, rgba(248,214,109,0.08), rgba(0,0,0,0.18));
+    }
+
+    .system-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .system-heading h3 {
+      margin: 0;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 24px;
+      color: #ffffff;
+    }
+
+    .system-heading span {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.78);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .system-card-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .system-card-row .mini-card {
+      height: 100%;
+    }
+
+    .type-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .mini-card {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .pros-card {
+      background: linear-gradient(180deg, rgba(46,230,194,0.12), rgba(0,0,0,0.22));
+      border-color: rgba(46,230,194,0.28);
+    }
+
+    .cons-card {
+      background: linear-gradient(180deg, rgba(255,155,155,0.12), rgba(0,0,0,0.22));
+      border-color: rgba(255,155,155,0.28);
+    }
+
+    .pros-card .pill-label {
+      color: #2ee6c2;
+      background: rgba(46,230,194,0.14);
+      border-color: rgba(46,230,194,0.28);
+    }
+
+    .cons-card .pill-label {
+      color: #ffb3b3;
+      background: rgba(255,155,155,0.14);
+      border-color: rgba(255,155,155,0.28);
+    }
+
+    .pros-card .soft-list li::before { color: #2ee6c2; }
+    .cons-card .soft-list li::before { color: #ff9b9b; }
+
+    .mini-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .mini-card p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.85;
+    }
+
+    .pill-label {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      color: #2ee6c2;
+      background: rgba(46,230,194,0.1);
+      border: 1px solid rgba(46,230,194,0.18);
+    }
+
+    .network-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .flow-node {
+      min-height: 96px;
+      padding: 14px;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: rgba(0,0,0,0.24);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #ffffff;
+      font-size: 15px;
+    }
+
+    .flow-node span {
+      color: rgba(255,255,255,0.62);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .flow-node.ips {
+      border-color: rgba(255,155,155,0.3);
+      background: rgba(255,155,155,0.08);
+    }
+
+    .flow-node.ids {
+      border-color: rgba(46,230,194,0.28);
+      background: rgba(46,230,194,0.08);
+    }
+
+    .flow-arrow {
+      color: #2ee6c2;
+      font-size: 22px;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .post-aside {
+      padding: 20px;
+      position: sticky;
+      top: 96px;
+    }
+
+    .post-aside h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      color: #ffffff;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toc-list a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.68);
+      transition: color .2s ease;
+    }
+
+    .toc-list a:hover { color: #2ee6c2; }
+
+    .bottom-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .nav-card { padding: 18px 20px; }
+
+    .nav-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #2ee6c2;
+    }
+
+    .nav-title {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #ffffff;
+    }
+
+    .site-footer { border-top: 1px solid rgba(255,255,255,0.1); }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      font-size: 14px;
+      color: rgba(255,255,255,0.62);
+    }
+
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+
+    @media (max-width: 1024px) {
+      .content-wrap { grid-template-columns: 1fr; }
+      .post-aside { position: static; }
+      .type-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .network-flow { grid-template-columns: 1fr; }
+      .flow-arrow { transform: rotate(90deg); justify-self: center; }
+    }
+
+    @media (max-width: 768px) {
+      .container { width: min(1120px, calc(100% - 48px)); }
+      .brand { font-size: 15px; white-space: nowrap; }
+      .brand img { width: 20px; height: 20px; }
+      .header-inner { flex-wrap: nowrap; gap: 12px; }
+      .site-nav {
+        width: auto;
+        justify-content: flex-end;
+        gap: 12px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .main { padding: 24px 0 80px; }
+      .post-hero, .post-content, .post-aside, .nav-card { padding: 18px; }
+      .section-title { font-size: 28px; }
+      .bottom-nav, .compare-grid, .pros-cons-grid, .metric-grid, .type-grid, .system-card-row { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="brand">
+        <img src="/images/profile.jpg" alt="profile" />
+        <span>soeun4159 | Security Blog</span>
+      </a>
+      <nav class="site-nav">
+        <a href="/index.html">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/posts.html" class="active">Post</a>
+        <button class="search-btn" aria-label="search" onclick="location.href='/posts.html?search=open'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2.2"/>
+            <path d="M16 16L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main container">
+    <section class="glow-card post-hero">
+      <div class="card-content">
+        <p class="section-label">POST</p>
+        <div class="post-meta">
+          <span class="badge">블로그/기술문서</span>
+          <span class="post-date">2026.05.27</span>
+        </div>
+        <h1 class="section-title">침입 탐지 및 방지 시스템(IDS/IPS)</h1>
+        <p class="post-summary">
+          동작 원리부터 유형, 탐지 방법, 장단점, 그리고 IDS와 IPS의 차이점까지 정리하였습니다.
+        </p>
+      </div>
+    </section>
+
+    <section class="glow-card post-cover">
+      <div class="card-content">
+        <img src="/images/ids-ips.jpg" alt="IDS IPS 네트워크 보안 대표 이미지" />
+      </div>
+    </section>
+
+    <section class="content-wrap">
+      <article class="post-content">
+        <div class="section-card">
+          <h2 id="intro">침입 탐지 및 방지 시스템</h2>
+          <p>
+            네트워크 보안에서 공격을 막으려면 먼저 <span class="highlight">무슨 일이 일어나고 있는지 볼 수 있어야</span> 한다. 여기서 등장하는 게 <code>IDS</code>와 <code>IPS</code>다. 둘 다 침입이나 이상 행위를 찾아내는 보안 장비지만, 가장 큰 차이는 <span class="keyword-highlight">탐지만 하느냐</span>, 아니면 <span class="danger-highlight">탐지하고 바로 차단까지 하느냐</span>에 있다.
+          </p>
+          <div class="metric-grid intro-metric-grid">
+            <div class="metric-card">
+              <span class="metric-value">IDS</span>
+              <span class="metric-label">의심스러운 행위를 탐지하고 관리자에게 알려주는 역할</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">IPS</span>
+              <span class="metric-label">탐지한 위협을 실시간으로 차단하는 역할</span>
+            </div>
+          </div>
+          <p>
+            이 글에서는 IDS와 IPS를 단순히 용어로만 외우는 게 아니라, 실제 네트워크에서 어떤 위치에 배치되고 어떤 기준으로 공격을 판단하는지까지 같이 살펴본다. 특히 둘의 차이는 시험이나 면접에서도 자주 나오는 부분이라, <span class="highlight">탐지 방식</span>, <span class="highlight">배치 위치</span>, <span class="highlight">장단점</span>을 연결해서 이해하는 게 중요하다.
+          </p>
+          <ul class="soft-list">
+            <li>IDS와 IPS의 기본 개념과 역할 차이</li>
+            <li>Inline, Out-of-band, Mirror Port 같은 네트워크 배치 방식</li>
+            <li>Signature, Anomaly, Hybrid 기반 탐지 방식</li>
+            <li>실제 운영 시 SIEM, 방화벽, EDR과 함께 쓰이는 구조</li>
+          </ul>
+          <div class="insight-box">
+            <strong>핵심 한 줄 요약</strong> — IDS는 “탐지 후 보고”, IPS는 “탐지 즉시 차단”이라고 보면 된다. IPS는 IDS의 기능을 포함하면서 한 단계 더 나아간 능동적 방어 시스템이라고 생각하면 편하다.
+          </div>
+        </div>
+
+        <div class="topic-box">
+          <div class="topic-title">01. Definition</div>
+          <h2 id="definition">IDS와 IPS란 무엇인가?</h2>
+          <p>
+            <code>IDS</code>는 <code>Intrusion Detection System</code>의 줄임말이고, 침입 탐지 시스템이라고 부른다. 네트워크나 시스템에서 의심스러운 활동이 발생하면 그걸 찾아내고 관리자에게 경보를 보내는 보안 솔루션이다.
+          </p>
+          <p>
+            쉽게 말하면 IDS는 CCTV에 가깝다. 누군가 수상한 행동을 하면 바로 화면에 잡고 경보를 울려준다. 하지만 직접 문을 잠그거나 침입자를 막아내지는 않는다. 판단하고 대응하는 건 보안 담당자의 몫이다.
+          </p>
+          <p>
+            <code>IPS</code>는 <code>Intrusion Prevention System</code>의 줄임말이고, 침입 방지 시스템이라고 부른다. IDS처럼 공격을 탐지하는 것에서 끝나지 않고, 탐지된 위협을 자동으로 차단하거나 연결을 끊는 기능까지 수행한다.
+          </p>
+
+          <div class="compare-grid">
+            <div class="mini-card">
+              <span class="pill-label">PASSIVE / IDS</span>
+              <h3>IDS</h3>
+              <p>
+                네트워크 트래픽을 모니터링하면서 이상 행위를 탐지하고 경고를 발생시킨다. 트래픽 흐름에는 직접 끼어들지 않기 때문에, 일단 알려주고 사람의 판단을 기다리는 방식이다.
+              </p>
+            </div>
+            <div class="mini-card">
+              <span class="pill-label">ACTIVE / IPS</span>
+              <h3>IPS</h3>
+              <p>
+                탐지와 동시에 공격 트래픽을 자동으로 차단한다. 보통 트래픽이 지나가는 길목에 Inline으로 배치되어, 위험하다고 판단한 패킷을 실시간으로 막을 수 있다.
+              </p>
+            </div>
+          </div>
+
+          <div class="note-box">
+            IDS는 “수상한 사람을 발견하고 알려주는 경비원”, IPS는 “문 앞에서 바로 막아서는 경비원”에 가깝다. 방화벽이 IP, Port, Protocol 같은 규칙을 기준으로 출입을 통제한다면, IDS/IPS는 트래픽 내용이나 행위 패턴을 보고 공격 징후를 찾아낸다는 점에서 차이가 있다.
+          </div>
+        </div>
+
+        <div class="topic-box">
+          <div class="topic-title">02. Network Position</div>
+          <h2 id="network-position">동작 원리 — 네트워크에서의 위치</h2>
+          <p>
+            IDS와 IPS는 둘 다 트래픽을 분석하지만, 네트워크에서 놓이는 위치가 다르다. 이 위치 차이 때문에 실제 역할도 달라진다. 아래 구조는 이해를 돕기 위한 예시이고, 실제 환경에서는 방화벽과 IPS의 위치가 보안 정책이나 장비 구성에 따라 달라질 수 있다.
+          </p>
+
+          <div class="network-flow" aria-label="IDS IPS network flow diagram">
+            <div class="flow-node">
+              <strong>인터넷</strong>
+              <span>외부 트래픽</span>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node ips">
+              <strong>IPS</strong>
+              <span>Inline 배치<br />차단 · 허용</span>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node">
+              <strong>방화벽</strong>
+              <span>정책 기반 필터링</span>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node ids">
+              <strong>IDS</strong>
+              <span>Mirror Port<br />모니터링 전용</span>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node">
+              <strong>내부 서버</strong>
+              <span>업무 시스템</span>
+            </div>
+          </div>
+
+          <p>
+            IPS는 보통 <code>Inline</code> 방식으로 트래픽 경로 위에 직접 배치된다. 그래서 모든 패킷이 IPS를 통과하고, IPS는 위험하다고 판단한 패킷을 바로 버리거나 연결을 끊을 수 있다. 대신 장비 장애가 생기면 네트워크 흐름 자체가 영향을 받을 수 있다.
+          </p>
+          <p>
+            IDS는 <code>Out-of-band</code> 방식으로 동작하는 경우가 많다. 스위치의 <code>Mirror Port</code> 또는 <code>SPAN Port</code>를 통해 트래픽 복사본을 받아 분석하는 식이다. 네트워크 흐름에 직접 끼어들지 않기 때문에 안전하지만, 이미 지나간 트래픽을 보고 판단하는 구조라 즉시 차단은 어렵다.
+          </p>
+          <div class="insight-box">
+            <strong>포인트</strong> — IPS는 길목에서 막는 장비고, IDS는 옆에서 지켜보는 장비다. 그래서 IPS는 빠른 차단이 가능하지만 장애 영향이 크고, IDS는 안전하게 감시할 수 있지만 차단은 사람이 따로 해야 한다.
+          </div>
+        </div>
+
+        <div class="topic-box">
+          <div class="topic-title">03. Detection Methods</div>
+          <h2 id="detection-methods">탐지 방법 3가지</h2>
+          <p>
+            IDS/IPS가 공격을 찾아내는 방식은 크게 세 가지로 볼 수 있다. 알려진 패턴을 찾는 방식, 평소와 다른 행동을 찾는 방식, 그리고 둘을 섞는 방식이다.
+          </p>
+
+          <div class="metric-grid">
+            <div class="metric-card">
+              <span class="metric-value">01</span>
+              <span class="metric-label">Signature-based Detection</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">02</span>
+              <span class="metric-label">Anomaly-based Detection</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">03</span>
+              <span class="metric-label">Hybrid Detection</span>
+            </div>
+          </div>
+
+          <h3>시그니처 기반 탐지</h3>
+          <p>
+            <code>Signature-based Detection</code>은 이미 알려진 공격 패턴과 현재 트래픽을 비교하는 방식이다. 예를 들어 요청 URL에 <code>' OR '1'='1</code> 같은 SQL Injection 패턴이 있거나, 특정 악성코드가 자주 사용하는 통신 문자열이 보이면 시그니처 DB와 매칭해서 공격으로 판단한다.
+          </p>
+          <p>
+            장점은 정확도가 높고 오탐이 상대적으로 적다는 점이다. 이미 알려진 공격에는 꽤 강하다. 대신 새로운 <code>Zero-day</code> 공격이나 기존 공격을 살짝 바꾼 변형 공격에는 약할 수 있다. 그래서 시그니처 DB 업데이트가 계속 필요하다.
+          </p>
+
+          <h3>이상 행위 기반 탐지</h3>
+          <p>
+            <code>Anomaly-based Detection</code>은 정상적인 네트워크 행동을 먼저 학습하고, 그 기준에서 많이 벗어난 행동을 이상으로 판단하는 방식이다. 예를 들어 평소에는 내부 서버가 특정 국가 IP와 통신하지 않았는데 갑자기 대량 통신을 하거나, 한 PC에서 짧은 시간 동안 여러 포트로 접속을 시도하면 이상 행위로 볼 수 있다.
+          </p>
+          <p>
+            이 방식은 알려지지 않은 신규 공격도 잡아낼 가능성이 있다. 하지만 정상 범위를 잘못 학습하면 문제가 생긴다. 평소와 조금만 달라도 공격으로 판단할 수 있어서 정상 트래픽을 공격으로 잘못 판단하는 오탐이 많이 발생할 수 있다.
+          </p>
+
+          <h3>하이브리드 탐지</h3>
+          <p>
+            <code>Hybrid Detection</code>은 시그니처 기반과 이상 행위 기반을 함께 사용하는 방식이다. 예를 들어 SQL Injection처럼 이미 알려진 패턴은 시그니처로 탐지하고, 평소와 다르게 트래픽이 급증하거나 비정상적인 접속 시도가 반복되는 경우는 이상 행위로 탐지하는 구조다.
+          </p>
+          <p>
+            요즘 IDS/IPS 솔루션은 대부분 한 가지 방식만 쓰기보다는 여러 방식을 섞어서 사용한다. 공격 방식이 계속 바뀌기 때문에, 단일 탐지 방식만으로는 한계가 있기 때문이다. 공격자는 탐지를 피하려고 요청을 인코딩하거나 패킷을 쪼개거나 정상 트래픽처럼 보이게 변형하기도 해서, 룰 업데이트와 지속적인 튜닝이 중요하다.
+          </p>
+        </div>
+
+        <div class="topic-box">
+          <div class="topic-title">04. IDS Types</div>
+          <h2 id="ids-types">IDS의 유형</h2>
+          <p>
+            IDS는 어디를 감시하느냐에 따라 여러 유형으로 나눌 수 있다. 보통은 네트워크를 보는 <code>NIDS</code>, 호스트 내부를 보는 <code>HIDS</code>, 무선 환경을 보는 <code>WIDS</code>가 대표적이고, 추가로 특정 프로토콜이나 애플리케이션 계층을 집중 분석하는 <code>PIDS/APIDS</code> 형태도 있다.
+          </p>
+
+          <div class="type-grid">
+            <div class="mini-card">
+              <span class="pill-label">NIDS</span>
+              <h3>네트워크 기반</h3>
+              <p>
+                네트워크 세그먼트의 트래픽 전체를 감시한다. 스위치의 미러 포트에 연결해서 넓은 범위를 모니터링할 수 있고, 기업 환경에서 가장 흔하게 사용된다.
+              </p>
+            </div>
+            <div class="mini-card">
+              <span class="pill-label">HIDS</span>
+              <h3>호스트 기반</h3>
+              <p>
+                서버나 PC 같은 개별 호스트에 에이전트를 설치해서 시스템 로그, 파일 변경, 프로세스 실행 등을 감시한다. 네트워크 구간에서 암호화되어 보이지 않던 행위도 호스트 내부 로그나 프로세스를 통해 확인할 수 있다는 장점이 있다.
+              </p>
+            </div>
+            <div class="mini-card">
+              <span class="pill-label">WIDS</span>
+              <h3>무선 기반</h3>
+              <p>
+                Wi-Fi 환경을 집중적으로 감시한다. 비인가 AP, Rogue AP, 무선 스니핑, Deauthentication 공격처럼 무선 네트워크 특유의 위협을 탐지한다.
+              </p>
+            </div>
+            <div class="mini-card">
+              <span class="pill-label">PIDS / APIDS</span>
+              <h3>프로토콜 기반</h3>
+              <p>
+                특정 프로토콜이나 애플리케이션 계층을 집중 분석한다. HTTP/HTTPS 같은 프로토콜 규칙 위반이나 애플리케이션 단의 비정상 행위를 찾아낸다.
+              </p>
+            </div>
+          </div>
+
+          <div class="note-box">
+            정리하면 NIDS는 “네트워크 전체 감시”, HIDS는 “개별 장비 내부 감시”, WIDS는 “무선 환경 감시”가 핵심이고, PIDS/APIDS는 “특정 프로토콜이나 앱 계층을 더 깊게 보는 형태”라고 보면 된다.
+          </div>
+        </div>
+
+        <div class="topic-box">
+          <div class="topic-title">05. IDS vs IPS</div>
+          <h2 id="ids-vs-ips">IDS vs IPS — 핵심 차이점</h2>
+          <p>
+            IDS와 IPS는 같은 뿌리에서 출발했지만, 대응 방식과 배치 방식에서 차이가 확실하다. 가장 중요한 건 IDS는 관찰과 경보 중심이고, IPS는 차단과 대응 중심이라는 점이다.
+          </p>
+
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>IDS</th>
+                <th>IPS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>대응 방식</td>
+                <td>탐지 후 경보를 보낸다</td>
+                <td>탐지 즉시 자동 차단한다</td>
+              </tr>
+              <tr>
+                <td>배치 위치</td>
+                <td>Mirror Port, Out-of-band</td>
+                <td>Inline, 트래픽 경로 상</td>
+              </tr>
+              <tr>
+                <td>네트워크 영향</td>
+                <td>복사본 분석이라 네트워크 흐름에는 영향이 거의 없다</td>
+                <td>Latency가 발생할 수 있다</td>
+              </tr>
+              <tr>
+                <td>오탐 위험</td>
+                <td>경보만 발생해서 서비스 영향은 낮다</td>
+                <td>정상 트래픽을 차단할 수 있다</td>
+              </tr>
+              <tr>
+                <td>장애 시 영향</td>
+                <td>모니터링만 중단된다</td>
+                <td>네트워크 전체 흐름에 영향이 생길 수 있다</td>
+              </tr>
+              <tr>
+                <td>사람 개입</td>
+                <td>보안 담당자의 판단과 사후 대응이 필요하다</td>
+                <td>정책에 따라 자동 대응할 수 있다</td>
+              </tr>
+              <tr>
+                <td>적합 환경</td>
+                <td>컴플라이언스, 포렌식, 가시성 확보</td>
+                <td>실시간 방어, 고보안 환경</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="insight-box">
+            <strong>주의할 점</strong> — IPS는 탐지한 내용을 바탕으로 트래픽을 바로 차단하기 때문에 오탐에 특히 주의해야 한다. 정상적인 업무 트래픽을 공격으로 잘못 판단하면 실제 서비스 장애로 이어질 수 있다. 그래서 처음부터 바로 차단 모드로 넣기보다는 Detection 모드로 로그를 보면서 정책을 튜닝하고, 안정화 후 Prevention 모드로 바꾸는 방식이 안전하다.
+          </div>
+        </div>
+
+        <div class="topic-box">
+          <div class="topic-title">06. Pros & Cons</div>
+          <h2 id="pros-cons">장점과 단점</h2>
+          <p>
+            IDS와 IPS는 서로 우열 관계라기보다는 목적이 다르다. IDS는 이상 행위를 찾아내고 알려주는 탐지 역할에 강하고, IPS는 위험하다고 판단한 트래픽을 바로 막는 차단 역할에 강하다. 대신 각각의 단점도 확실히 존재한다.
+          </p>
+
+          <div class="system-pros-cons">
+            <div class="system-row ids-row">
+              <div class="system-heading">
+                <h3>IDS</h3>
+                <span>탐지 중심</span>
+              </div>
+              <div class="system-card-row">
+                <div class="mini-card pros-card">
+                  <span class="pill-label">IDS 장점</span>
+                  <ul class="soft-list">
+                    <li>네트워크 흐름에는 거의 영향을 주지 않는다</li>
+                    <li>다양한 트래픽 로그를 모아 포렌식 분석에 활용할 수 있다</li>
+                    <li>오탐이 발생해도 서비스가 바로 중단되지는 않는다</li>
+                    <li>복잡한 네트워크 환경에도 비교적 유연하게 배치할 수 있다</li>
+                    <li>컴플라이언스나 감사 목적에 잘 맞는다</li>
+                  </ul>
+                </div>
+                <div class="mini-card cons-card">
+                  <span class="pill-label">IDS 단점</span>
+                  <ul class="soft-list">
+                    <li>실시간 공격 차단은 어렵다</li>
+                    <li>경보를 보고 사람이 직접 대응해야 한다</li>
+                    <li>경보가 너무 많아지면 Alert Fatigue가 생길 수 있다</li>
+                    <li>빠른 공격은 탐지 후 이미 피해가 발생했을 수 있다</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="system-row ips-row">
+              <div class="system-heading">
+                <h3>IPS</h3>
+                <span>차단 중심</span>
+              </div>
+              <div class="system-card-row">
+                <div class="mini-card pros-card">
+                  <span class="pill-label">IPS 장점</span>
+                  <ul class="soft-list">
+                    <li>실시간 자동 차단으로 즉각 대응할 수 있다</li>
+                    <li>24시간 무인 자동화 방어에 유리하다</li>
+                    <li>자동화 공격이나 빠른 공격에 효과적이다</li>
+                    <li>보안팀의 수동 대응 부담을 줄일 수 있다</li>
+                  </ul>
+                </div>
+                <div class="mini-card cons-card">
+                  <span class="pill-label">IPS 단점</span>
+                  <ul class="soft-list">
+                    <li>오탐 시 정상 트래픽까지 차단할 수 있다</li>
+                    <li>Inline 배치라 Latency가 발생할 수 있다</li>
+                    <li>장비 장애 시 네트워크 전체에 영향을 줄 수 있다</li>
+                    <li>초기 설정과 정책 튜닝에 시간이 필요하다</li>
+                    <li>암호화 트래픽은 복호화 설정이 없으면 내용 기반 분석에 한계가 있다</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topic-box">
+          <div class="topic-title">07. Use Cases</div>
+          <h2 id="use-cases">실제 활용 방법</h2>
+          <p>
+            실제 기업 환경에서는 IDS나 IPS 하나만 따로 두기보다는, 방화벽, <code>SIEM</code>, EDR 같은 다른 보안 솔루션과 함께 사용한다. 이걸 보통 <code>Defense in Depth</code>, 즉 다층 방어 전략이라고 부른다.
+          </p>
+          <p>
+            <code>SIEM</code>은 <code>Security Information and Event Management</code>의 줄임말이다. IDS/IPS, 방화벽, 서버, EDR에서 발생한 로그와 이벤트를 한곳에 모아서 분석하고, 서로 관련 있는 경보를 연결해주는 중앙 관제 시스템이라고 보면 된다.
+          </p>
+
+          <h3>주요 활용 시나리오</h3>
+          <ul class="soft-list">
+            <li>기업 내부망으로 들어오는 공격 트래픽 탐지 및 차단</li>
+            <li>클라우드 환경에서 의심스러운 통신 모니터링</li>
+            <li>컴플라이언스 감사에 필요한 보안 로그 확보</li>
+            <li>무선 네트워크에서 Rogue AP나 비인가 접속 탐지</li>
+            <li>데이터센터 경계 구간에서 외부 공격 방어</li>
+            <li>OT/ICS 환경에서 비정상 프로토콜 사용 감시</li>
+          </ul>
+
+          <div class="insight-box">
+            <strong>권장 운영 방식</strong> — IPS를 도입할 때는 처음부터 바로 차단 모드로 운영하지 않는 게 좋다. 먼저 IDS처럼 로그만 남기는 Detection 모드로 운영하면서 오탐을 줄이고, 정책이 안정화되면 Prevention 모드로 전환하는 방식이 훨씬 안전하다.
+          </div>
+
+          <p>
+            IDS/IPS에서 나온 경보는 SIEM과 연동해서 중앙에서 관리하는 게 좋다. 장비별로 로그를 따로 보면 전체 공격 흐름을 놓치기 쉽기 때문이다. 예를 들어 방화벽 로그, IDS 탐지 로그, EDR 이벤트가 SIEM에서 하나로 연결되면 공격자가 어떤 경로로 들어왔는지 훨씬 보기 쉬워진다.
+          </p>
+
+          <div class="compare-grid">
+            <div class="mini-card">
+              <span class="pill-label">IDS / IPS</span>
+              <h3>탐지와 차단</h3>
+              <p>
+                네트워크 트래픽에서 공격 징후를 찾아내고, IPS의 경우 위험 트래픽을 바로 차단한다. 즉, 현장에서 공격을 발견하거나 막는 역할에 가깝다.
+              </p>
+            </div>
+            <div class="mini-card">
+              <span class="pill-label">SIEM 중심</span>
+              <h3>로그 통합과 분석</h3>
+              <p>
+                대표적으로 SIEM이 이 역할을 맡는다. 다만 SIEM만 단독으로 끝나는 건 아니고, 로그 관리 시스템, SOAR, XDR 같은 체계와 연결되어 경보 분석과 대응까지 이어질 수 있다.
+              </p>
+            </div>
+          </div>
+
+          <h3>실무에서 자주 보이는 도구</h3>
+          <table class="mini-table tools-table">
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>예시</th>
+                <th>특징</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>오픈소스</td>
+                <td>Snort, Suricata, OSSEC</td>
+                <td>학습이나 실습에 좋고, 룰 기반 탐지를 직접 이해하기 좋다</td>
+              </tr>
+              <tr>
+                <td>상용 솔루션</td>
+                <td>Cisco Firepower, Palo Alto Networks NGFW</td>
+                <td>기업 환경에서 운영 편의성과 통합 보안 기능을 제공한다</td>
+              </tr>
+              <tr>
+                <td>클라우드</td>
+                <td>AWS GuardDuty, Microsoft Defender for Cloud, GCP Security Command Center</td>
+                <td>클라우드 로그와 이벤트를 기반으로 위협을 탐지하고 관리한다</td>
+              </tr>
+              <tr>
+                <td>SIEM</td>
+                <td>Splunk Enterprise Security, Elastic SIEM, IBM QRadar, Microsoft Sentinel</td>
+                <td>IDS/IPS, 방화벽, EDR 로그를 모아 상관분석하고 보안 관제에 활용한다</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="topic-box">
+          <div class="topic-title">08. Summary Table</div>
+          <h2 id="summary-table">요약 비교표</h2>
+          <p>
+            마지막으로 IDS와 IPS를 한 표로 정리하면 아래처럼 볼 수 있다.
+          </p>
+
+          <table class="mini-table summary-compare-table">
+            <thead>
+              <tr>
+                <th>항목</th>
+                <th>IDS</th>
+                <th>IPS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>목적</td>
+                <td>침입 탐지</td>
+                <td>침입 차단</td>
+              </tr>
+              <tr>
+                <td>동작</td>
+                <td>Passive</td>
+                <td>Active</td>
+              </tr>
+              <tr>
+                <td>배치</td>
+                <td>Out-of-band</td>
+                <td>Inline</td>
+              </tr>
+              <tr>
+                <td>응답 시간</td>
+                <td>사람이 판단한 뒤 대응</td>
+                <td>실시간 자동 대응</td>
+              </tr>
+              <tr>
+                <td>네트워크 영향</td>
+                <td>네트워크 흐름에는 거의 없음</td>
+                <td>Latency 발생 가능</td>
+              </tr>
+              <tr>
+                <td>오탐 위험도</td>
+                <td>낮음, 경보만 발생</td>
+                <td>높음, 서비스 차단 가능</td>
+              </tr>
+              <tr>
+                <td>주요 용도</td>
+                <td>포렌식, 컴플라이언스, 가시성 확보</td>
+                <td>실시간 위협 차단, 자동화 대응</td>
+              </tr>
+              <tr>
+                <td>대표 도구</td>
+                <td>Snort IDS Mode, Suricata IDS Mode, OSSEC</td>
+                <td>Snort IPS Mode, Suricata IPS Mode, Cisco Firepower</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="insight-box">
+            <strong>최종 정리</strong> — IDS와 IPS는 경쟁 관계라기보다 상호 보완 관계다. IDS로 넓게 보고, IPS로 위험한 트래픽을 막고, SIEM으로 전체 로그를 모아서 분석하는 조합이 현대적인 보안 아키텍처에 가깝다.
+          </div>
+        </div>
+
+        <div class="topic-box">
+          <div class="topic-title">Closing</div>
+          <h2 id="closing">마무리</h2>
+          <p>
+            처음에는 IDS와 IPS가 이름도 비슷하고 역할도 비슷해 보여서 헷갈렸다. 하지만 정리해보니 핵심은 생각보다 단순한 것 같다.<br />
+            <span class="highlight">IDS는 이상 행위를 찾아내는 탐지 장비</span>이고, <span class="danger-highlight">IPS는 위험한 트래픽을 바로 막는 차단 장비</span>다.
+          </p>
+          <p>
+            이번 내용을 정리하면서 흥미로웠던 점은 IDS와 IPS가 단순히 “탐지 장비”와 “차단 장비”로만 나뉘는 게 아니라, <span class="highlight">네트워크에 어디에 배치되느냐</span>에 따라 역할과 위험성이 크게 달라진다는 부분이었다. IDS는 안전하게 지켜보는 데 강하고, IPS는 직접 개입해서 막는 데 강하다는 차이가 꽤 인상적이었다.
+          </p>
+          <p>
+            중요한 건 둘 중 하나만 무조건 선택하는 게 아니라, 환경에 맞게 조합하는 것이다. IDS는 네트워크에서 어떤 일이 일어나는지 넓게 볼 수 있게 해주고, IPS는 공격이 실제 피해로 이어지기 전에 빠르게 막아준다. 여기에 SIEM을 연결하면 여러 장비의 로그를 한곳에서 분석할 수 있어서 공격 흐름을 훨씬 더 잘 파악할 수 있다.
+          </p>
+          <p>
+            결국 IDS/IPS를 이해한다는 건 단순히 보안 장비 이름을 외우는 게 아니라, <span class="keyword-highlight">탐지 → 분석 → 차단 → 대응</span>으로 이어지는 네트워크 보안의 흐름을 이해하는 것이다. 그래서 보안 공부를 할 때 IDS와 IPS는 꼭 한 번 제대로 정리해두면 좋은 개념이라고 생각한다.
+          </p>
+        </div>
+      </article>
+
+      <aside class="glow-card post-aside">
+        <div class="card-content">
+          <h3>On this page</h3>
+          <nav class="toc-list">
+            <a href="#intro">침입 탐지 및 방지 시스템</a>
+            <a href="#definition">1. IDS와 IPS란?</a>
+            <a href="#network-position">2. 동작 원리</a>
+            <a href="#detection-methods">3. 탐지 방법 3가지</a>
+            <a href="#ids-types">4. IDS의 유형</a>
+            <a href="#ids-vs-ips">5. IDS vs IPS</a>
+            <a href="#pros-cons">6. 장점과 단점</a>
+            <a href="#use-cases">7. 실제 활용 방법</a>
+            <a href="#summary-table">8. 요약 비교표</a>
+            <a href="#closing">마무리</a>
+          </nav>
+        </div>
+      </aside>
+    </section>
+
+    <section class="bottom-nav">
+      <a href="/posts/post6.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">Previous post</span>
+          <span class="nav-title">Unsafe LLM-Based Search: AI Web Search의 안전성 리스크 분석</span>
+        </div>
+      </a>
+      <a href="/posts.html" class="glow-card nav-card">
+        <div class="card-content">
+          <span class="nav-label">All posts</span>
+          <span class="nav-title">전체 글 목록으로 돌아가기</span>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/soeun4159">github</a>
+        <a href="mailto:soeun4159@email.com">email</a>
+        <a href="https://discord.com/users/soeun_4159">discord</a>
+        <a href="https://instagram.com/nueosse">instagram</a>
+      </div>
+      <p>© 2026 Soeun Security Blog. Built with GitHub Pages.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.glow-card, .topic-box, .section-card').forEach((card) => {
+      card.addEventListener('mousemove', (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        card.style.setProperty('--x', `${x}px`);
+        card.style.setProperty('--y', `${y}px`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--x', '50%');
+        card.style.setProperty('--y', '50%');
+      });
+    });
+
+    document.querySelectorAll('.toc-list a[href^="#"]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const targetId = link.getAttribute('href').slice(1);
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        const headerOffset = 170;
+        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
