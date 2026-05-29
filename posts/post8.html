@@ -789,6 +789,19 @@
       line-height: 1.7;
     }
 
+
+    .screenshot-box > div {
+      width: 100%;
+    }
+
+    .screenshot-box strong {
+      color: #ffffff;
+    }
+
+    .screenshot-box img {
+      margin-top: 12px;
+    }
+
   </style>
 </head>
 <body>
@@ -840,9 +853,9 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>ssh bandit0@bandit.labs.overthewire.org -p 2220</code></td><td>bandit0 계정으로 Bandit 서버에 접속한다. <code>-p 2220</code>은 SSH 접속 포트를 2220으로 지정하는 옵션이다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 01/42</strong><br />WSL Ubuntu 실행 및 Bandit 접속 준비 화면<br />&lt;img src="images/bandit/bandit-01.png" alt="WSL 설치 및 Bandit 접속 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>WSL Ubuntu 실행 및 Bandit 접속 준비 화면</strong><br /><img src="images/bandit/bandit-01.png" alt="WSL 설치 및 Bandit 접속 캡처" /></div></div>
 <p class="screenshot-desc">먼저 WSL Ubuntu 터미널을 준비한 뒤, 다음 캡처에서 실제 Bandit 서버에 SSH로 접속하는 과정을 보여준다.</p>
-<div class="screenshot-box"><div><strong>캡처 02/42</strong><br />SSH로 bandit0 계정에 접속한 화면<br />&lt;img src="images/bandit/bandit-02.png" alt="WSL 설치 및 Bandit 접속 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>SSH로 bandit0 계정에 접속한 화면</strong><br /><img src="images/bandit/bandit-02.png" alt="WSL 설치 및 Bandit 접속 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -853,7 +866,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>ls</code></td><td>현재 디렉터리에 있는 파일 목록을 확인한다.</td></tr><tr><td><code>cat readme</code></td><td>readme 파일의 내용을 터미널에 출력한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 03/42</strong><br />Level 0 → 1 풀이 화면<br />&lt;img src="images/bandit/bandit-03.png" alt="Level 0 → Level 1 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 0 → 1 풀이 화면</strong><br /><img src="images/bandit/bandit-03.png" alt="Level 0 → Level 1 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -864,7 +877,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>ls</code></td><td>파일명이 <code>-</code>인 파일이 있는지 확인한다.</td></tr><tr><td><code>cat ./-</code></td><td>현재 디렉터리에 있는 <code>-</code> 파일을 읽는다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 04/42</strong><br />Level 1 → 2 풀이 화면<br />&lt;img src="images/bandit/bandit-04.png" alt="Level 1 → Level 2 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 1 → 2 풀이 화면</strong><br /><img src="images/bandit/bandit-04.png" alt="Level 1 → Level 2 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -875,7 +888,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>ls</code></td><td>공백이 포함된 파일명을 확인한다.</td></tr><tr><td><code>cat "spaces in this filename"</code></td><td>따옴표로 파일명 전체를 감싸 공백을 포함한 이름을 하나의 인자로 전달한다.</td></tr><tr><td><code>cat spaces\ in\ this\ filename</code></td><td>공백 앞에 <code>\</code>를 붙여 escape 처리하는 방법이다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 05/42</strong><br />Level 2 → 3 풀이 화면<br />&lt;img src="images/bandit/bandit-05.png" alt="Level 2 → Level 3 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 2 → 3 풀이 화면</strong><br /><img src="images/bandit/bandit-05.png" alt="Level 2 → Level 3 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -886,7 +899,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>cd inhere</code></td><td>문제에서 지정된 하위 디렉터리로 이동한다.</td></tr><tr><td><code>ls -al</code></td><td>숨김 파일을 포함해 자세한 파일 목록을 출력한다. <code>-a</code>는 all, <code>-l</code>은 long format이다.</td></tr><tr><td><code>cat ...Hiding-From-You</code></td><td>숨겨져 있던 파일의 내용을 출력한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 06/42</strong><br />Level 3 → 4 풀이 화면<br />&lt;img src="images/bandit/bandit-06.png" alt="Level 3 → Level 4 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 3 → 4 풀이 화면</strong><br /><img src="images/bandit/bandit-06.png" alt="Level 3 → Level 4 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -897,7 +910,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>cd inhere</code></td><td>파일들이 있는 디렉터리로 이동한다.</td></tr><tr><td><code>file ./*</code></td><td>현재 디렉터리의 모든 파일 형식을 확인한다.</td></tr><tr><td><code>cat ./-file07</code></td><td>ASCII text로 확인된 파일을 읽는다. 파일명이 <code>-</code>로 시작하므로 <code>./</code>를 붙였다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 07/42</strong><br />Level 4 → 5 풀이 화면<br />&lt;img src="images/bandit/bandit-07.png" alt="Level 4 → Level 5 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 4 → 5 풀이 화면</strong><br /><img src="images/bandit/bandit-07.png" alt="Level 4 → Level 5 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -908,7 +921,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>find . -type f -size 1033c</code></td><td>현재 디렉터리 아래에서 크기가 1033 bytes인 일반 파일을 찾는다. <code>c</code>는 byte 단위이다.</td></tr><tr><td><code>cat ./maybehere07/.file2</code></td><td>find 결과로 나온 파일의 내용을 확인한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 08/42</strong><br />Level 5 → 6 풀이 화면<br />&lt;img src="images/bandit/bandit-08.png" alt="Level 5 → Level 6 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 5 → 6 풀이 화면</strong><br /><img src="images/bandit/bandit-08.png" alt="Level 5 → Level 6 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -919,7 +932,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>find / -type f -user bandit7 -group bandit6 -size 33c 2&gt;/dev/null</code></td><td>루트 경로부터 조건에 맞는 파일을 검색하고, 권한 오류 출력은 버린다.</td></tr><tr><td><code>cat /var/lib/dpkg/info/bandit7.password</code></td><td>검색된 password 파일을 읽는다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 09/42</strong><br />Level 6 → 7 풀이 화면<br />&lt;img src="images/bandit/bandit-09.png" alt="Level 6 → Level 7 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 6 → 7 풀이 화면</strong><br /><img src="images/bandit/bandit-09.png" alt="Level 6 → Level 7 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -930,7 +943,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>cat data.txt | grep millionth</code></td><td>data.txt 내용을 출력한 뒤, 파이프라인으로 grep에 넘겨 millionth가 포함된 줄만 출력한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 10/42</strong><br />Level 7 → 8 풀이 화면<br />&lt;img src="images/bandit/bandit-10.png" alt="Level 7 → Level 8 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 7 → 8 풀이 화면</strong><br /><img src="images/bandit/bandit-10.png" alt="Level 7 → Level 8 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -941,7 +954,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>sort data.txt | uniq -u</code></td><td>파일 내용을 정렬한 다음 한 번만 등장하는 줄을 출력한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 11/42</strong><br />Level 8 → 9 풀이 화면<br />&lt;img src="images/bandit/bandit-11.png" alt="Level 8 → Level 9 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 8 → 9 풀이 화면</strong><br /><img src="images/bandit/bandit-11.png" alt="Level 8 → Level 9 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -952,7 +965,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>strings data.txt | grep "=="</code></td><td>data.txt에서 출력 가능한 문자열만 뽑고, 그중 <code>==</code>가 포함된 줄을 찾는다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 12/42</strong><br />Level 9 → 10 풀이 화면<br />&lt;img src="images/bandit/bandit-12.png" alt="Level 9 → Level 10 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 9 → 10 풀이 화면</strong><br /><img src="images/bandit/bandit-12.png" alt="Level 9 → Level 10 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -963,7 +976,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>cat data.txt</code></td><td>인코딩된 문자열을 확인한다.</td></tr><tr><td><code>base64 -d data.txt</code></td><td>Base64로 인코딩된 데이터를 디코딩한다. <code>-d</code>는 decode 옵션이다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 13/42</strong><br />Level 10 → 11 풀이 화면<br />&lt;img src="images/bandit/bandit-13.png" alt="Level 10 → Level 11 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 10 → 11 풀이 화면</strong><br /><img src="images/bandit/bandit-13.png" alt="Level 10 → Level 11 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -974,7 +987,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>cat data.txt | tr 'a-zA-Z' 'n-za-mN-ZA-M'</code></td><td>data.txt 내용을 ROT13 규칙으로 다시 치환해 원래 문자열을 복원한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 14/42</strong><br />Level 11 → 12 풀이 화면<br />&lt;img src="images/bandit/bandit-14.png" alt="Level 11 → Level 12 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 11 → 12 풀이 화면</strong><br /><img src="images/bandit/bandit-14.png" alt="Level 11 → Level 12 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -985,11 +998,11 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>mktemp -d</code></td><td>/tmp 아래에 임시 작업 디렉터리를 만든다.</td></tr><tr><td><code>cp ~/data.txt .</code></td><td>원본 파일을 작업 디렉터리로 복사한다.</td></tr><tr><td><code>xxd -r data.txt &gt; a</code></td><td>hexdump를 원래 바이너리 형태로 복원한다.</td></tr><tr><td><code>file a</code></td><td>현재 파일 형식을 확인해 어떤 압축인지 판단한다.</td></tr><tr><td><code>gzip -d, bzip2 -d, tar -xf</code></td><td>확인된 압축 형식에 맞게 압축을 해제한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 15/42</strong><br />Level 12 → 13 시작 화면<br />&lt;img src="images/bandit/bandit-15.png" alt="Level 12 → Level 13 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 12 → 13 시작 화면</strong><br /><img src="images/bandit/bandit-15.png" alt="Level 12 → Level 13 캡처" /></div></div>
 <p class="screenshot-desc">이 단계에서는 원본 파일을 바로 읽는 것이 아니라, 임시 작업 디렉터리를 만든 뒤 hexdump를 바이너리 파일로 되돌리는 준비 과정을 먼저 진행했다.</p>
-<div class="screenshot-box"><div><strong>캡처 16/42</strong><br />압축 형식 확인 및 해제 과정<br />&lt;img src="images/bandit/bandit-16.png" alt="Level 12 → Level 13 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>압축 형식 확인 및 해제 과정</strong><br /><img src="images/bandit/bandit-16.png" alt="Level 12 → Level 13 캡처" /></div></div>
 <p class="screenshot-desc"><code>file</code> 명령어로 현재 파일 형식을 확인하고, gzip, bzip2, tar 중 맞는 방식으로 압축을 하나씩 해제했다. 압축을 풀 때마다 파일 형식이 바뀌기 때문에 같은 과정을 반복했다.</p>
-<div class="screenshot-box"><div><strong>캡처 17/42</strong><br />최종 텍스트 파일 확인 화면<br />&lt;img src="images/bandit/bandit-17.png" alt="Level 12 → Level 13 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>최종 텍스트 파일 확인 화면</strong><br /><img src="images/bandit/bandit-17.png" alt="Level 12 → Level 13 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1000,17 +1013,17 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>cat sshkey.private</code></td><td>private key 내용을 확인한다.</td></tr><tr><td><code>scp -P 2220 bandit13@bandit.labs.overthewire.org:~/sshkey.private ./</code></td><td>Bandit 서버에 있는 키 파일을 현재 로컬 경로로 다운로드한다. scp는 포트 옵션이 대문자 <code>-P</code>이다.</td></tr><tr><td><code>chmod 600 sshkey.private</code></td><td>SSH private key 권한을 안전하게 설정한다.</td></tr><tr><td><code>ssh -i sshkey.private bandit14@bandit.labs.overthewire.org -p 2220</code></td><td>지정한 private key를 사용해 bandit14 계정으로 접속한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 18/42</strong><br />sshkey.private 확인 화면<br />&lt;img src="images/bandit/bandit-18.png" alt="Level 13 → Level 14 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>sshkey.private 확인 화면</strong><br /><img src="images/bandit/bandit-18.png" alt="Level 13 → Level 14 캡처" /></div></div>
 <p class="screenshot-desc">처음에는 서버 안에 있는 private key 내용을 직접 확인했다. 하지만 SSH key는 줄바꿈과 파일 형식이 중요해서 단순 복사만으로는 오류가 날 수 있다.</p>
-<div class="screenshot-box"><div><strong>캡처 19/42</strong><br />복사한 키로 접속을 시도했지만 실패한 화면<br />&lt;img src="images/bandit/bandit-19.png" alt="Level 13 → Level 14 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>복사한 키로 접속을 시도했지만 실패한 화면</strong><br /><img src="images/bandit/bandit-19.png" alt="Level 13 → Level 14 캡처" /></div></div>
 <p class="screenshot-desc">복사한 키로 접속이 되지 않아, 키 내용을 로컬 파일로 저장하는 방식도 시도했다. 이 과정에서 key 형식이나 권한 설정이 올바르지 않으면 SSH가 키를 거부한다는 것을 확인했다.</p>
-<div class="screenshot-box"><div><strong>캡처 20/42</strong><br />nano로 키를 저장해본 화면<br />&lt;img src="images/bandit/bandit-20.png" alt="Level 13 → Level 14 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>nano로 키를 저장해본 화면</strong><br /><img src="images/bandit/bandit-20.png" alt="Level 13 → Level 14 캡처" /></div></div>
 <p class="screenshot-desc">직접 붙여넣는 방식보다 파일 자체를 가져오는 편이 안전하다고 판단해서, <code>scp</code>로 원본 키 파일을 다운로드하는 방법을 사용했다.</p>
-<div class="screenshot-box"><div><strong>캡처 21/42</strong><br />scp 명령어 형식을 찾아 정리한 화면<br />&lt;img src="images/bandit/bandit-21.png" alt="Level 13 → Level 14 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>scp 명령어 형식을 찾아 정리한 화면</strong><br /><img src="images/bandit/bandit-21.png" alt="Level 13 → Level 14 캡처" /></div></div>
 <p class="screenshot-desc"><code>scp</code>에서는 SSH와 다르게 포트 옵션을 대문자 <code>-P</code>로 적어야 한다. 이 점을 확인한 뒤 서버의 <code>sshkey.private</code> 파일을 로컬로 복사했다.</p>
-<div class="screenshot-box"><div><strong>캡처 22/42</strong><br />scp로 sshkey.private를 가져온 화면<br />&lt;img src="images/bandit/bandit-22.png" alt="Level 13 → Level 14 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>scp로 sshkey.private를 가져온 화면</strong><br /><img src="images/bandit/bandit-22.png" alt="Level 13 → Level 14 캡처" /></div></div>
 <p class="screenshot-desc">가져온 private key는 권한을 제한한 뒤 <code>ssh -i</code> 옵션에 지정해서 사용했다. 이 방식으로 password 없이 bandit14 계정에 접속할 수 있다.</p>
-<div class="screenshot-box"><div><strong>캡처 23/42</strong><br />ssh -i로 bandit14 접속을 시도한 화면<br />&lt;img src="images/bandit/bandit-23.png" alt="Level 13 → Level 14 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>ssh -i로 bandit14 접속을 시도한 화면</strong><br /><img src="images/bandit/bandit-23.png" alt="Level 13 → Level 14 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1021,7 +1034,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>nc localhost 30000</code></td><td>현재 서버의 30000번 포트에 TCP 연결을 생성한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 24/42</strong><br />Level 14 → 15 풀이 화면<br />&lt;img src="images/bandit/bandit-24.png" alt="Level 14 → Level 15 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 14 → 15 풀이 화면</strong><br /><img src="images/bandit/bandit-24.png" alt="Level 14 → Level 15 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1032,7 +1045,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>ncat --ssl localhost 30001</code></td><td>SSL 연결을 사용해 30001번 포트에 접속한다.</td></tr><tr><td><code>openssl s_client -connect localhost:30001</code></td><td>openssl을 이용해 SSL/TLS 연결을 테스트하는 대체 방법이다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 25/42</strong><br />Level 15 → 16 풀이 화면<br />&lt;img src="images/bandit/bandit-25.png" alt="Level 15 → Level 16 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 15 → 16 풀이 화면</strong><br /><img src="images/bandit/bandit-25.png" alt="Level 15 → Level 16 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1043,11 +1056,11 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>nc -z localhost 31000-32000</code></td><td>지정한 포트 범위에서 열려 있는 포트를 확인한다. <code>-z</code>는 연결만 확인하고 데이터를 보내지 않는다.</td></tr><tr><td><code>ncat --ssl localhost 31790</code></td><td>찾은 SSL 포트에 접속해 현재 password를 전송한다.</td></tr><tr><td><code>ssh -i keyfile bandit17@bandit.labs.overthewire.org -p 2220</code></td><td>받은 private key로 bandit17 계정에 접속한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 26/42</strong><br />포트 스캔 화면<br />&lt;img src="images/bandit/bandit-26.png" alt="Level 16 → Level 17 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>포트 스캔 화면</strong><br /><img src="images/bandit/bandit-26.png" alt="Level 16 → Level 17 캡처" /></div></div>
 <p class="screenshot-desc">먼저 31000~32000 범위에서 열려 있는 포트를 찾았다. 열린 포트가 여러 개일 수 있으므로, 이후에는 SSL 통신이 가능한 포트인지 직접 확인해야 했다.</p>
-<div class="screenshot-box"><div><strong>캡처 27/42</strong><br />RSA private key 획득 화면<br />&lt;img src="images/bandit/bandit-27.png" alt="Level 16 → Level 17 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>RSA private key 획득 화면</strong><br /><img src="images/bandit/bandit-27.png" alt="Level 16 → Level 17 캡처" /></div></div>
 <p class="screenshot-desc">맞는 SSL 포트에 현재 password를 전송하자 다음 레벨 접속용 RSA private key가 출력되었다. 이 키를 파일로 저장한 뒤 다음 접속에 사용했다.</p>
-<div class="screenshot-box"><div><strong>캡처 28/42</strong><br />받은 키로 다음 계정 접속을 시도한 화면<br />&lt;img src="images/bandit/bandit-28.png" alt="Level 16 → Level 17 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>받은 키로 다음 계정 접속을 시도한 화면</strong><br /><img src="images/bandit/bandit-28.png" alt="Level 16 → Level 17 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1058,9 +1071,9 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>diff passwords.new passwords.old</code></td><td>두 파일을 비교해 서로 다른 줄을 출력한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 29/42</strong><br />diff 결과 확인 화면<br />&lt;img src="images/bandit/bandit-29.png" alt="Level 17 → Level 18 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>diff 결과 확인 화면</strong><br /><img src="images/bandit/bandit-29.png" alt="Level 17 → Level 18 캡처" /></div></div>
 <p class="screenshot-desc"><code>diff</code> 결과에서 두 파일의 다른 줄을 확인했다. 새 password는 <code>passwords.new</code> 쪽에 있는 값이므로, 방향을 헷갈리지 않도록 현재 계정 password도 함께 비교했다.</p>
-<div class="screenshot-box"><div><strong>캡처 30/42</strong><br />현재 계정 password도 함께 확인해둔 화면<br />&lt;img src="images/bandit/bandit-30.png" alt="Level 17 → Level 18 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>현재 계정 password도 함께 확인해둔 화면</strong><br /><img src="images/bandit/bandit-30.png" alt="Level 17 → Level 18 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1071,7 +1084,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>ssh bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></td><td>로그인 shell을 열지 않고 원격에서 readme 파일을 바로 출력한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 31/42</strong><br />Level 18 → 19 풀이 화면<br />&lt;img src="images/bandit/bandit-31.png" alt="Level 18 → Level 19 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 18 → 19 풀이 화면</strong><br /><img src="images/bandit/bandit-31.png" alt="Level 18 → Level 19 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1082,7 +1095,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>ls -al</code></td><td>setuid가 걸린 실행 파일과 권한을 확인한다.</td></tr><tr><td><code>./bandit20-do cat /etc/bandit_pass/bandit20</code></td><td>bandit20 권한으로 password 파일을 읽는다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 32/42</strong><br />Level 19 → 20 풀이 화면<br />&lt;img src="images/bandit/bandit-32.png" alt="Level 19 → Level 20 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 19 → 20 풀이 화면</strong><br /><img src="images/bandit/bandit-32.png" alt="Level 19 → Level 20 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1093,9 +1106,9 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>nc -l 3003</code></td><td>3003번 포트를 열고 연결을 기다린다.</td></tr><tr><td><code>./suconnect 3003</code></td><td>3003번 포트로 접속해 password를 검증한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 33/42</strong><br />nc로 포트를 열어둔 화면<br />&lt;img src="images/bandit/bandit-33.png" alt="Level 20 → Level 21 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>nc로 포트를 열어둔 화면</strong><br /><img src="images/bandit/bandit-33.png" alt="Level 20 → Level 21 캡처" /></div></div>
 <p class="screenshot-desc">이 문제는 두 개의 터미널을 함께 사용했다. 한쪽에서는 <code>nc -l</code>로 포트를 열고 현재 password를 보낼 준비를 했다.</p>
-<div class="screenshot-box"><div><strong>캡처 34/42</strong><br />suconnect 실행 결과 화면<br />&lt;img src="images/bandit/bandit-34.png" alt="Level 20 → Level 21 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>suconnect 실행 결과 화면</strong><br /><img src="images/bandit/bandit-34.png" alt="Level 20 → Level 21 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1106,7 +1119,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>ls -al /etc/cron.d</code></td><td>등록된 cron 작업 목록을 확인한다.</td></tr><tr><td><code>cat /etc/cron.d/cronjob_bandit22</code></td><td>bandit22 관련 cron 설정을 확인한다.</td></tr><tr><td><code>cat /usr/bin/cronjob_bandit22.sh</code></td><td>cron이 실행하는 스크립트 내용을 확인한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 35/42</strong><br />Level 21 → 22 풀이 화면<br />&lt;img src="images/bandit/bandit-35.png" alt="Level 21 → Level 22 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 21 → 22 풀이 화면</strong><br /><img src="images/bandit/bandit-35.png" alt="Level 21 → Level 22 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1117,7 +1130,7 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>cat /usr/bin/cronjob_bandit23.sh</code></td><td>password가 저장되는 파일명 생성 로직을 확인한다.</td></tr><tr><td><code>echo I am user bandit23 | md5sum | cut -d ' ' -f 1</code></td><td>bandit23 기준의 임시 파일명을 계산한다.</td></tr><tr><td><code>cat /tmp/계산된파일명</code></td><td>계산한 경로에 저장된 password를 읽는다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 36/42</strong><br />Level 22 → 23 풀이 화면<br />&lt;img src="images/bandit/bandit-36.png" alt="Level 22 → Level 23 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>Level 22 → 23 풀이 화면</strong><br /><img src="images/bandit/bandit-36.png" alt="Level 22 → Level 23 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1128,13 +1141,13 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>cat /usr/bin/cronjob_bandit24.sh</code></td><td>cron이 어떤 경로의 스크립트를 실행하는지 확인한다.</td></tr><tr><td><code>mktemp -d</code></td><td>작업용 임시 디렉터리를 만든다.</td></tr><tr><td><code>nano password.sh</code></td><td>bandit24 password를 내가 읽을 수 있는 파일로 복사하는 스크립트를 작성한다.</td></tr><tr><td><code>chmod 777 password.sh</code></td><td>cron이 실행할 수 있도록 권한을 부여한다.</td></tr><tr><td><code>cp password.sh /var/spool/bandit24/foo</code></td><td>cron이 실행하는 디렉터리로 스크립트를 복사한다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 37/42</strong><br />cronjob_bandit24.sh 확인 화면<br />&lt;img src="images/bandit/bandit-37.png" alt="Level 23 → Level 24 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>cronjob_bandit24.sh 확인 화면</strong><br /><img src="images/bandit/bandit-37.png" alt="Level 23 → Level 24 캡처" /></div></div>
 <p class="screenshot-desc">먼저 cron 스크립트 내용을 확인해서 어떤 디렉터리의 파일을 자동 실행하는지 파악했다. 핵심은 내가 만든 스크립트를 cron이 실행하는 위치에 넣는 것이다.</p>
-<div class="screenshot-box"><div><strong>캡처 38/42</strong><br />임시 디렉터리와 스크립트 작성 화면<br />&lt;img src="images/bandit/bandit-38.png" alt="Level 23 → Level 24 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>임시 디렉터리와 스크립트 작성 화면</strong><br /><img src="images/bandit/bandit-38.png" alt="Level 23 → Level 24 캡처" /></div></div>
 <p class="screenshot-desc">임시 디렉터리에서 결과를 저장할 파일과 실행할 스크립트를 만들었다. 스크립트는 bandit24 권한으로 password 파일을 읽고, 내가 접근 가능한 위치에 결과를 저장하도록 작성했다.</p>
-<div class="screenshot-box"><div><strong>캡처 39/42</strong><br />스크립트 내용 및 권한 확인 화면<br />&lt;img src="images/bandit/bandit-39.png" alt="Level 23 → Level 24 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>스크립트 내용 및 권한 확인 화면</strong><br /><img src="images/bandit/bandit-39.png" alt="Level 23 → Level 24 캡처" /></div></div>
 <p class="screenshot-desc">작성한 스크립트가 cron에 의해 실행될 수 있도록 실행 권한을 부여한 뒤, cron이 감시하는 디렉터리로 복사했다. 이후 cron이 실행될 때까지 잠시 기다렸다.</p>
-<div class="screenshot-box"><div><strong>캡처 40/42</strong><br />결과 파일에서 password를 확인한 화면<br />&lt;img src="images/bandit/bandit-40.png" alt="Level 23 → Level 24 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>결과 파일에서 password를 확인한 화면</strong><br /><img src="images/bandit/bandit-40.png" alt="Level 23 → Level 24 캡처" /></div></div>
         </div>
 
         <div class="topic-box">
@@ -1145,9 +1158,9 @@
             <thead><tr><th>명령어</th><th>설명</th></tr></thead>
             <tbody><tr><td><code>for i in {0000..9999}; do echo "현재비밀번호 $i"; done</code></td><td>현재 password와 4자리 PIN 조합을 10000개 생성한다.</td></tr><tr><td><code>... | nc localhost 30002</code></td><td>생성한 입력을 30002번 포트의 검증 서비스로 보낸다.</td></tr><tr><td><code>grep Correct</code></td><td>출력이 많을 때 성공한 줄만 찾는 데 사용할 수 있다.</td></tr></tbody>
           </table>
-          <div class="screenshot-box"><div><strong>캡처 41/42</strong><br />PIN 브루트포스 입력 생성 및 전송 화면<br />&lt;img src="images/bandit/bandit-41.png" alt="Level 24 → Level 25 캡처" /&gt;</div></div>
+          <div class="screenshot-box"><div><strong>PIN 브루트포스 입력 생성 및 전송 화면</strong><br /><img src="images/bandit/bandit-41.png" alt="Level 24 → Level 25 캡처" /></div></div>
 <p class="screenshot-desc">현재 password와 0000~9999 PIN 조합을 한 줄씩 생성해서 서비스에 전달했다. 출력이 많기 때문에 성공 메시지인 <code>Correct!</code>가 포함된 부분을 기준으로 결과를 확인했다.</p>
-<div class="screenshot-box"><div><strong>캡처 42/42</strong><br />Correct 결과 확인 화면<br />&lt;img src="images/bandit/bandit-42.png" alt="Level 24 → Level 25 캡처" /&gt;</div></div>
+<div class="screenshot-box"><div><strong>Correct 결과 확인 화면</strong><br /><img src="images/bandit/bandit-42.png" alt="Level 24 → Level 25 캡처" /></div></div>
         </div>
       </article>
 
@@ -1186,10 +1199,10 @@
       </aside>
 </section>
 <section class="bottom-nav">
-<a class="glow-card nav-card" href="/posts/post7.html">
+<a class="glow-card nav-card" href="/posts/post6.html">
 <div class="card-content">
 <span class="nav-label">Previous post</span>
-<span class="nav-title">침입 탐지 및 방지 시스템(IDS/IPS)</span>
+<span class="nav-title">Unsafe LLM-Based Search: AI Web Search의 안전성 리스크 분석</span>
 </div>
 </a>
 <a class="glow-card nav-card" href="/posts.html">
